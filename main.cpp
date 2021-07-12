@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
         int f = format.toInt();
         if (f >= 0 && f <= 1) {
             seq.setOutputFormat(f);
-            qDebug() << "format:" << f;
+            //qDebug() << "format:" << f;
         } else {
             qWarning() << "wrong format:" << f;
         }
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
         QFileInfo f(a.toString());
         if (f.exists()) {
             fileNames += f.canonicalFilePath();
-            qDebug() << "input:" << fileNames;
+            //qDebug() << "input:" << fileNames;
             break;
         } else {
             qWarning() << "file not found:" << f.fileName();
@@ -74,15 +74,15 @@ int main(int argc, char *argv[])
     }
 
     if (!fileNames.isEmpty()) {
-        QString outfile;
+        QString outfile, infile = fileNames.first();
         if (parser.isSet(outputOption)) {
             outfile = parser.value(outputOption);
         } else {
-            QFileInfo finfo(fileNames.first());
+            QFileInfo finfo(infile);
             outfile = finfo.path() + QDir::separator() + finfo.baseName() + ".mid";
         }
-        qDebug() << "output:" << outfile;
-        seq.loadFile(fileNames.first());
+        //qDebug() << "output:" << outfile;
+        seq.loadFile(infile);
         seq.saveFile(outfile);
         return seq.returnCode();
     }

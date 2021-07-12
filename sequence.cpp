@@ -538,13 +538,11 @@ void Sequence::wrkNoteEvent(int track, long time, int chan, int pitch, int vol, 
 {
     TrackMapRec rec = m_trackMap[track+1];
     int channel = rec.channel > -1 ? rec.channel : chan;
-    int key = pitch + rec.pitch;
-    int velocity = rec.velocity > -1 ? rec.velocity : vol;
+    int key = qBound(0, pitch + rec.pitch, 127);
+    int velocity = qBound(0, vol + rec.velocity, 127);
     //qDebug() << Q_FUNC_INFO << track << time << chan << key << velocity << dur;
-    if (pitch > m_highestMidiNote)
-        m_highestMidiNote = pitch;
-    if (pitch < m_lowestMidiNote)
-        m_lowestMidiNote = pitch;
+    m_highestMidiNote = qMax(pitch, m_highestMidiNote);
+    m_lowestMidiNote = qMin(pitch, m_lowestMidiNote);
     MIDIEvent* ev = new NoteOnEvent(channel, key, velocity);
     ev->setTag(track+1);
     appendWRKEvent(time, ev);
