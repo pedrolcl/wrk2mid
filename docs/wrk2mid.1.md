@@ -1,9 +1,9 @@
-% WRK2MID(1) wrk2mid 0.0.0 | Cakewalk to Standard MIDI File Converter
+% WRK2MID(1) wrk2mid 0.0.0 | Cakewalk to Standard MIDI File Translator
 % Pedro López-Cabanillas <plcl@users.sf.net>
 
 # NAME
 
-**wrk2mid** — Cakewalk to Standard MIDI Files Translator
+**wrk2mid** — Cakewalk to Standard MIDI File Translator
 
 # SYNOPSIS
 
