@@ -35,6 +35,15 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
 find_package(Drumstick 2.0 COMPONENTS File REQUIRED)
 
+message (STATUS "Cakewalk to Standard MIDI File Converter v${PROJECT_VERSION}
+     install prefix: ${CMAKE_INSTALL_PREFIX}
+     Build configuration: ${CMAKE_BUILD_TYPE}
+     Operating System: ${CMAKE_SYSTEM_NAME}
+     Processor: ${CMAKE_SYSTEM_PROCESSOR}
+     Qt Version: ${QT_VERSION}
+     Drumstick Version: ${Drumstick_VERSION}"
+)
+
 add_executable(${PROJECT_NAME}
   events.cpp
   events.h
@@ -51,3 +60,8 @@ target_link_libraries(${PROJECT_NAME}
   Qt${QT_VERSION_MAJOR}::Core
   Drumstick::File
 )
+
+include(GNUInstallDirs)
+add_subdirectory(docs)
+install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
