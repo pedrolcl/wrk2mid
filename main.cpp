@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
             outfile = parser.value(outputOption);
         } else {
             QFileInfo finfo(infile);
-            outfile = finfo.path() + QDir::separator() + finfo.baseName() + ".mid";
+            outfile = QDir::current().absoluteFilePath(finfo.baseName() + ".mid");
         }
         //qDebug() << "output:" << outfile;
         seq.loadFile(infile);
