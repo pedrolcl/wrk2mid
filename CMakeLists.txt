@@ -34,6 +34,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
 find_package(Drumstick 2.3 COMPONENTS File REQUIRED)
@@ -65,8 +67,19 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 include(GNUInstallDirs)
+set(PROJECT_RELEASE_DATE "July 20, 2021")
 add_subdirectory(docs)
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-configure_file(wrktest.in wrktest.sh @ONLY)
+# uninstall target
+if(NOT TARGET uninstall)
+  configure_file(
+    "${CMAKE_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    IMMEDIATE @ONLY)
+  add_custom_target ( uninstall
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
+
+configure_file(wrktest.in wrktest.sh IMMEDIATE @ONLY)

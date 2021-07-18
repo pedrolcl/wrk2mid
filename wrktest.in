@@ -1,3 +1,4 @@
 #!/bin/bash
+# Example script to test wrk files
 DIR=${1:-"."}
 find $DIR -iname '*.wrk' -print -exec ./@PROJECT_NAME@ -t {} \;
