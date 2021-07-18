@@ -68,3 +68,5 @@ include(GNUInstallDirs)
 add_subdirectory(docs)
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+configure_file(wrktest.in wrktest.sh @ONLY)

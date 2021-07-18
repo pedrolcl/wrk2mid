@@ -16,7 +16,7 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <QDebug>
+#include <iostream>
 #include <QCoreApplication>
 #include <QCommandLineParser>
 #include <QFileInfo>
@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
     parser.addOption(formatOption);
     QCommandLineOption outputOption({"o", "output"}, "Output file name", "output");
     parser.addOption(outputOption);
+    QCommandLineOption testOption({"t", "test"}, "Test only (no output)");
+    parser.addOption(testOption);
     parser.addPositionalArgument("file", "Input WRK File Name", "file");
     parser.process(app);
 
@@ -57,7 +59,7 @@ int main(int argc, char *argv[])
             seq.setOutputFormat(f);
             //qDebug() << "format:" << f;
         } else {
-            qWarning() << "wrong format:" << f;
+            std::cerr << "wrong format:" << f << std::endl;
         }
     }
 
@@ -69,7 +71,7 @@ int main(int argc, char *argv[])
             //qDebug() << "input:" << fileNames;
             break;
         } else {
-            qWarning() << "file not found:" << f.fileName();
+            std::cerr << "file not found:" << f.fileName().toStdString() << std::endl;
         }
     }
 
@@ -83,7 +85,9 @@ int main(int argc, char *argv[])
         }
         //qDebug() << "output:" << outfile;
         seq.loadFile(infile);
-        seq.saveFile(outfile);
+        if (!parser.isSet(testOption) && seq.returnCode() == 0) {
+            seq.saveFile(outfile);
+        }
         return seq.returnCode();
     }
     return EXIT_FAILURE;

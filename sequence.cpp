@@ -16,7 +16,7 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <QDebug>
+#include <iostream>
 #include <QtMath>
 #include <QFileInfo>
 #include <QRegularExpression>
@@ -176,8 +176,8 @@ void Sequence::loadFile(const QString& fileName)
             if (ext == "wrk") {
                 m_wrk->readFromFile(fileName);
             } else {
-                qWarning() << "Wrong file type";
-                m_returnCode = 1;
+                std::cerr << "wrong file type" << std::endl;
+                m_returnCode = EXIT_FAILURE;
                 return;
             }
             emit loadingFinished();
@@ -192,7 +192,7 @@ void Sequence::loadFile(const QString& fileName)
             m_currentFile = finfo.fileName();
         } catch (...) {
             m_returnCode = EXIT_FAILURE;
-            qWarning() << "corrupted file";
+            std::cerr << "corrupted file" << std::endl;
             clear();
         }
     }
@@ -440,8 +440,8 @@ void Sequence::smfTempoTrackHandler()
 
 void Sequence::smfErrorHandler(const QString& errorStr)
 {
-    qWarning() << QString("%1 at file offset %2").arg(errorStr).arg(m_smf->getFilePos());
-    m_returnCode = 1;
+    std::cerr << errorStr.toStdString() << " at file offset " << m_smf->getFilePos() << std::endl;
+    m_returnCode = EXIT_FAILURE;
 }
 
 /* ********************************* *
@@ -469,8 +469,8 @@ void Sequence::appendWRKEvent(long ticks, MIDIEvent* ev)
 
 void Sequence::wrkErrorHandler(const QString& errorStr)
 {
-    qWarning() << QString("%1 at file offset %2<br>")
-        .arg(errorStr).arg(m_wrk->getFilePos());
+    std::cerr << errorStr.toStdString() << " at file offset " << m_wrk->getFilePos() << std::endl;
+    m_returnCode = EXIT_FAILURE;
 }
 
 void Sequence::wrkFileHeader(int verh, int verl)

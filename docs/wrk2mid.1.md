@@ -33,6 +33,10 @@ It reads .WRK (Cakewalk files), and outputs .MID (Standard MIDI files).
 
 :   Output file name. By default is the same name as the input file, replacing .WRK with a .MID suffix.
 
+-t, --test
+
+:   Test input file only, without output.
+
 ## Arguments
 
 _input_file_

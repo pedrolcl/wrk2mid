@@ -14,6 +14,7 @@ Options:
   -v, --version          Displays version information.
   -f, --format <format>  SMF Format (0/1)
   -o, --output <output>  Output file name
+  -t, --test             Test only (no output)
 
 Arguments:
   file                   Input WRK File Name
