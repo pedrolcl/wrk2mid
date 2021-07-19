@@ -374,9 +374,11 @@ void Sequence::outputEvent(MIDIEvent* ev)
             break;
         case MIDIEvent::MIDI_STATUS_PITCHBEND: {
                 PitchBendEvent* event = static_cast<PitchBendEvent*>(ev);
-                int val = event->value();
-                //qDebug() << event->tick() << "Bender:" << chan << val;
-                m_smf->writeMidiEvent(ev->delta(), pitch_wheel, chan, val);
+                int val = 8192 + event->value();
+                int lsb = val % 0x80;
+                int msb = val / 0x80;
+                //qDebug() << event->tick() << "Bender:" << chan << val << lsb << msb;
+                m_smf->writeMidiEvent(ev->delta(), pitch_wheel, chan, lsb, msb);
             }
             break;
         default:
