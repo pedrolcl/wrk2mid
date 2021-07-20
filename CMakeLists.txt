@@ -75,7 +75,7 @@ if (QT_VERSION VERSION_GREATER_EQUAL 6.0.0)
 endif()
 
 include(GNUInstallDirs)
-set(PROJECT_RELEASE_DATE "July 20, 2021")
+set(PROJECT_RELEASE_DATE "July 30, 2021")
 add_subdirectory(docs)
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
@@ -97,10 +97,11 @@ if (Git_FOUND)
     find_program(GZIP gzip)
     find_program(BZIP2 bzip2)
     if ((EXISTS ${GZIP}) AND (EXISTS ${BZIP2}))
+        set(ARCHNAME ${PROJECT_NAME}-${PROJECT_VERSION})
         add_custom_target ( tarballs
-            COMMAND ${GIT_EXECUTABLE} archive --format=zip --prefix=${PROJECT_NAME}-${PROJECT_VERSION}/ --output ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}.zip master
-            COMMAND ${GIT_EXECUTABLE} archive --format=tar --prefix=${PROJECT_NAME}-${PROJECT_VERSION}/ master | ${GZIP} > ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz
-            COMMAND ${GIT_EXECUTABLE} archive --format=tar --prefix=${PROJECT_NAME}-${PROJECT_VERSION}/ master | ${BZIP2} > ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}.tar.bz2
+            COMMAND ${GIT_EXECUTABLE} archive --format=zip --prefix=${ARCHNAME}/ --output ${CMAKE_BINARY_DIR}/${ARCHNAME}.zip master
+            COMMAND ${GIT_EXECUTABLE} archive --format=tar --prefix=${ARCHNAME}/ master | ${GZIP} > ${CMAKE_BINARY_DIR}/${ARCHNAME}.tar.gz
+            COMMAND ${GIT_EXECUTABLE} archive --format=tar --prefix=${ARCHNAME}/ master | ${BZIP2} > ${CMAKE_BINARY_DIR}/${ARCHNAME}.tar.bz2
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             COMMENT "Creating tarballs..."
             VERBATIM )

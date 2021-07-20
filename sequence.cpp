@@ -807,7 +807,7 @@ void Sequence::wrkTimeSignatureEvent(int bar, int num, int den)
         if (!found) {
             TimeSigRec& lasts = m_bars.last();
             newts.time = lasts.time +
-                    (lasts.num * 4 / lasts.den * m_division * (bar - lasts.bar));
+                    (lasts.num * 4 * m_division / lasts.den * (bar - lasts.bar));
             m_bars.append(newts);
         }
     }
