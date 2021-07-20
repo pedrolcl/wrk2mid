@@ -33,7 +33,7 @@ if(NOT EXISTS ${PANDOC_EXECUTABLE})
     find_program(PANDOC_EXECUTABLE pandoc)
     mark_as_advanced(PANDOC_EXECUTABLE)
     if(NOT EXISTS ${PANDOC_EXECUTABLE})
-        message(FATAL_ERROR "Pandoc not found. Install Pandoc or set the cache variable PANDOC_EXECUTABLE.")
+        message(WARNING "Pandoc not found. Install Pandoc or set the cache variable PANDOC_EXECUTABLE.")
     endif()
 endif()
 

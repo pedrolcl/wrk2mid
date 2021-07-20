@@ -88,7 +88,7 @@ find_package(Git)
 if (Git_FOUND)
     find_program(GZIP gzip)
     find_program(BZIP2 bzip2)
-    if (GZIP AND BZIP2)
+    if ((EXISTS ${GZIP}) AND (EXISTS ${BZIP2}))
         add_custom_target ( tarballs
             COMMAND ${GIT_EXECUTABLE} archive --format=zip --prefix=${PROJECT_NAME}-${PROJECT_VERSION}/ --output ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}.zip master
             COMMAND ${GIT_EXECUTABLE} archive --format=tar --prefix=${PROJECT_NAME}-${PROJECT_VERSION}/ master | ${GZIP} > ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz
@@ -97,6 +97,6 @@ if (Git_FOUND)
             COMMENT "Creating tarballs..."
             VERBATIM )
     else()
-        message(WARNING "missing utilities for tarball creation")
+        message(WARNING "Missing utilities for tarball creation")
     endif()
 endif()
