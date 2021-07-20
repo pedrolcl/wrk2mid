@@ -40,6 +40,10 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
 find_package(Drumstick 2.3 COMPONENTS File REQUIRED)
 
+if(QT_VERSION VERSION_GREATER_EQUAL 6.0.0)
+    find_package(Qt6 COMPONENTS Core5Compat REQUIRED)
+endif()
+
 message (STATUS "Cakewalk to Standard MIDI File Translator v${PROJECT_VERSION}
      install prefix: ${CMAKE_INSTALL_PREFIX}
      Build configuration: ${CMAKE_BUILD_TYPE}
@@ -65,6 +69,10 @@ target_link_libraries(${PROJECT_NAME}
   Qt${QT_VERSION_MAJOR}::Core
   Drumstick::File
 )
+
+if (QT_VERSION VERSION_GREATER_EQUAL 6.0.0)
+    target_link_libraries( ${PROJECT_NAME} Qt6::Core5Compat )
+endif()
 
 include(GNUInstallDirs)
 set(PROJECT_RELEASE_DATE "July 20, 2021")
