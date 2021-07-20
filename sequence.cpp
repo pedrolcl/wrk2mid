@@ -405,8 +405,12 @@ void Sequence::outputEvent(MIDIEvent* ev)
         } else
         if (typeid(*ev) == timeSigId) {
             TimeSignatureEvent* event = static_cast<TimeSignatureEvent*>(ev);
-            //qDebug() << ev->tick() << "TimeSignature:" << event->numerator() << "/" << event->denominator();
-            m_smf->writeTimeSignature(ev->delta(), event->numerator(), event->denominator(), 24, 8);
+            int dd, x = event->denominator();
+            for (dd = 0; x > 1; x /= 2) {
+                ++dd;
+            }
+            //qDebug() << ev->tick() << "TimeSignature:" << event->numerator() << "/" << event->denominator() << dd;
+            m_smf->writeTimeSignature(ev->delta(), event->numerator(), dd, 24, 8);
         } else
         if (typeid(*ev) == keySigId) {
             KeySignatureEvent* event = static_cast<KeySignatureEvent*>(ev);
@@ -780,8 +784,6 @@ void Sequence::wrkExpression(int track, long time, int /*code*/, const QByteArra
 
 void Sequence::wrkTimeSignatureEvent(int bar, int num, int den)
 {
-    //qDebug() << Q_FUNC_INFO << bar << num << den;
-
     MIDIEvent* ev = new TimeSignatureEvent(num, den);
     m_beatMax = num;
     m_beatLength = m_division * 4 / den;
@@ -811,6 +813,7 @@ void Sequence::wrkTimeSignatureEvent(int bar, int num, int den)
     }
     ev->setTag( bar );
     appendWRKEvent(newts.time, ev);
+    //qDebug() << Q_FUNC_INFO << newts.time << bar << num << den;
 }
 
 void Sequence::wrkKeySig(int bar, int alt)
