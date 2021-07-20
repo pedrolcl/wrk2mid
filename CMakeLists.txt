@@ -83,3 +83,20 @@ if(NOT TARGET uninstall)
 endif()
 
 configure_file(wrktest.in wrktest.sh IMMEDIATE @ONLY)
+
+find_package(Git)
+if (GIT_FOUND)
+    find_program(GZIP gzip)
+    find_program(BZIP2 bzip2)
+    if (GZIP AND BZIP2)
+        add_custom_target ( tarballs
+            COMMAND ${GIT_EXECUTABLE} archive --format=zip --prefix=${PROJECT_NAME}-${PROJECT_VERSION}/ --output ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}.zip master
+            COMMAND ${GIT_EXECUTABLE} archive --format=tar --prefix=${PROJECT_NAME}-${PROJECT_VERSION}/ master | ${GZIP} > ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz
+            COMMAND ${GIT_EXECUTABLE} archive --format=tar --prefix=${PROJECT_NAME}-${PROJECT_VERSION}/ master | ${BZIP2} > ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION}.tar.bz2
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            COMMENT "Creating tarballs..."
+            VERBATIM )
+    else()
+        message(FATAL "missing utilities for tarball creation")
+    endif()
+endif()
