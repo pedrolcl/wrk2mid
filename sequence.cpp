@@ -537,11 +537,14 @@ void Sequence::wrkPitchBendEvent(int track, long time, int chan, int value)
 
 void Sequence::wrkProgramEvent(int track, long time, int chan, int patch)
 {
-    TrackMapRec rec = m_trackMap[track+1];
-    int channel = rec.channel > -1 ? rec.channel : chan;
-    MIDIEvent* ev = new ProgramChangeEvent(channel, patch);
-    ev->setTag(track+1);
-    appendWRKEvent(time, ev);
+    if (patch >= 0 && patch < 128) {
+        TrackMapRec rec = m_trackMap[track+1];
+        int channel = rec.channel > -1 ? rec.channel : chan;
+        MIDIEvent* ev = new ProgramChangeEvent(channel, patch);
+        ev->setTag(track+1);
+        appendWRKEvent(time, ev);
+        //qDebug() << Q_FUNC_INFO << track << time << channel << patch;
+    }
 }
 
 void Sequence::wrkChanPressEvent(int track, long time, int chan, int press)
@@ -631,6 +634,7 @@ void Sequence::wrkTrackPatch(int track, int patch)
     TrackMapRec rec = m_trackMap[track+1];
     int channel = rec.channel > -1 ? rec.channel : 0;
     wrkProgramEvent(track+1, 0, channel, patch);
+    //qDebug() << Q_FUNC_INFO << track << patch;
 }
 
 void Sequence::wrkNewTrackHeader( const QByteArray& data,
