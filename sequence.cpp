@@ -29,11 +29,10 @@ Sequence::Sequence(QObject *parent) : QObject(parent),
     m_wrk(nullptr),
     m_returnCode(EXIT_SUCCESS),
     m_format(1),
-    m_numTracks(0),
     m_ticksDuration(0),
     m_division(-1),
     m_pos(0),
-    m_curTrack(-1),
+    m_curTrack(0),
     m_beatMax(0),
     m_barCount(0),
     m_beatCount(0),
@@ -50,7 +49,6 @@ Sequence::Sequence(QObject *parent) : QObject(parent),
     m_smf = new QSmf(this);
     connect(m_smf, &QSmf::signalSMFError, this, &Sequence::smfErrorHandler);
     connect(m_smf, &QSmf::signalSMFWriteTrack, this, &Sequence::smfTrackHandler);
-    connect(m_smf, &QSmf::signalSMFWriteTempoTrack, this, &Sequence::smfTempoTrackHandler);
 
     m_wrk = new QWrk(this);
     connect(m_wrk, &QWrk::signalWRKError, this, &Sequence::wrkErrorHandler);
@@ -92,11 +90,6 @@ Sequence::~Sequence()
     clear();
 }
 
-int Sequence::lastBar()
-{
-    return m_barCount;
-}
-
 static inline bool eventLessThan(const MIDIEvent* s1, const MIDIEvent *s2)
 {
     return s1->tick() < s2->tick();
@@ -120,7 +113,6 @@ void Sequence::clear()
     m_lblName.clear();
     m_ticksDuration = 0;
     m_division = -1;
-    m_curTrack = -1;
     m_pos = 0;
     m_tempo = 500000.0;
     m_tick = 0;
@@ -131,14 +123,9 @@ void Sequence::clear()
     m_lowestMidiNote = 127;
     m_highestMidiNote = 0;
     m_curTrack = 0;
-    m_trackLabel.clear();
     m_trackMap.clear();
     m_savedSysexEvents.clear();
     m_textEvents.clear();
-    m_trkScore.clear();
-    m_typScore.clear();
-    m_trkName.clear();
-    m_trkChannel.clear();
     for(auto it=m_tracksList.keyBegin(); it != m_tracksList.keyEnd(); ++it) {
         EventsList& list = m_tracksList[*it];
         while (!list.isEmpty()) {
@@ -200,8 +187,8 @@ void Sequence::loadFile(const QString& fileName)
 
 void Sequence::saveFile(const QString& fileName)
 {
-    int tracks = m_format == 0 ? 1 : m_tracksList.count();
-    //qDebug() << Q_FUNC_INFO << fileName;
+    int tracks = m_format == 0 ? 1 : m_tracksList.size();
+    //qDebug() << Q_FUNC_INFO << fileName << "tracks:" << tracks << m_tracksList.keys();
     m_smf->setDivision(m_division);
     m_smf->setFileFormat(m_format);
     m_smf->setTracks(tracks);
@@ -221,44 +208,6 @@ int Sequence::returnCode()
 QString Sequence::currentFile() const
 {
     return m_currentFile;
-}
-
-int Sequence::getNumTracks() const
-{
-    return m_numTracks;
-}
-
-int Sequence::trackMaxPoints()
-{
-    int k = -1;
-    auto values = m_trkScore.values();
-    if (!values.isEmpty()) {
-        int v = *std::max_element(values.begin(), values.end());
-        k = m_trkScore.key(v, -1);
-    }
-    return k;
-}
-
-int Sequence::typeMaxPoints()
-{
-    int k = -1;
-    auto values = m_typScore.values();
-    if (!values.isEmpty()) {
-        int v = *std::max_element(values.begin(), values.end());
-        k = m_typScore.key(v, -1);
-    }
-    return k;
-}
-
-QByteArray Sequence::trackName(int track) const
-{
-    return m_trkName.value(track);
-}
-
-int Sequence::trackChannel(int track) const
-{
-    //qDebug() << "track:" << track << "channel:" << m_trkChannel.value(track);
-    return m_trkChannel.value(track);
 }
 
 void Sequence::timeCalculations()
@@ -426,22 +375,25 @@ void Sequence::outputEvent(MIDIEvent* ev)
 
 void Sequence::smfTrackHandler(int track)
 {
-    //qDebug() << Q_FUNC_INFO << track;
     if (m_format == 0) {
         track = 0;
+    } else {
+        auto trkids = m_tracksList.keys();
+        if (track < trkids.size()) {
+            track = trkids[track];
+        } else {
+            return;
+        }
     }
-    for(auto it = m_tracksList[track].cbegin(); it != m_tracksList[track].cend(); ++it) {
-        MIDIEvent* ev = *it;
-        outputEvent(ev);
+    if (m_tracksList[track].count() > 0) {
+        //Debug() << Q_FUNC_INFO << "track:" << track << "events:" << m_tracksList[track].count() << "channel:" << m_trkChannel[track];
+        for(auto it = m_tracksList[track].cbegin(); it != m_tracksList[track].cend(); ++it) {
+            MIDIEvent* ev = *it;
+            outputEvent(ev);
+        }
+        // final event
+        m_smf->writeMetaEvent(0, end_of_track);
     }
-    // final event
-    m_smf->writeMetaEvent(0, end_of_track);
-}
-
-void Sequence::smfTempoTrackHandler()
-{
-    //qDebug() << Q_FUNC_INFO << "ignored!";
-    return;
 }
 
 void Sequence::smfErrorHandler(const QString& errorStr)
@@ -483,7 +435,6 @@ void Sequence::wrkFileHeader(int verh, int verl)
 {
     //qDebug() << Q_FUNC_INFO << verh << verl;
     m_curTrack = 0;
-    m_numTracks = 0;
     m_division = 120;
     m_beatLength = m_division;
     m_beatMax = 4;
@@ -527,10 +478,7 @@ void Sequence::wrkTrackHeader( const QByteArray& name1,
     rec.pitch = pitch;
     rec.velocity = velocity;
     m_curTrack = trackno + 1;
-    if (m_curTrack > m_numTracks) {
-        m_numTracks = m_curTrack;
-    }
-    //qDebug() << Q_FUNC_INFO << "trackno:" << trackno << "numTracks:" << m_numTracks;
+    //qDebug() << Q_FUNC_INFO << "track:" << m_curTrack << "name:" << name1 << name2 << "channel:" << channel;
     m_trackMap[m_curTrack] = rec;
     QByteArray trkName = name1 + ' ' + name2;
     trkName = trkName.trimmed();
@@ -632,35 +580,9 @@ void Sequence::wrkSysexEventBank(int bank, const QString& /*name*/,
 
 void Sequence::appendWRKmetadata(int track, long time, TextType type, const QByteArray& data)
 {
-    Q_ASSERT(track > 0);
-    if (m_trkScore.contains(track)) {
-        m_trkScore[track]++;
-    } else {
-        m_trkScore[track] = 1;
-    }
-    if (m_typScore.contains(type)) {
-        m_typScore[type]++;
-    } else {
-        m_typScore[type] = 1;
-    }
-    TextType t = static_cast<TextType>(type);
-    m_textEvents.append(TextRec(time, track, t, data));
-    switch ( t ) {
-    case Sequence::Lyric:
-    case Sequence::Text: {
-            TextEvent *ev = new TextEvent(data, t);
-            ev->setTag(track);
-            appendWRKEvent(time, ev);
-        }
-        break;
-    case Sequence::TrackName:
-    case Sequence::InstrumentName:
-        m_trackLabel = data;
-        m_trkName[track] = data;
-        break;
-    default:
-        break;
-    }
+    TextEvent *ev = new TextEvent(data, type);
+    ev->setTag(track);
+    appendWRKEvent(time, ev);
     wrkUpdateLoadProgress();
 }
 
@@ -721,12 +643,8 @@ void Sequence::wrkNewTrackHeader( const QByteArray& data,
     rec.pitch = pitch;
     rec.velocity = velocity;
     m_curTrack = trackno + 1;
-    if (m_curTrack > m_numTracks) {
-        m_numTracks = m_curTrack;
-    }
-    //qDebug() << Q_FUNC_INFO << "trackno:" << trackno << "numTracks:" << m_numTracks;
+    //qDebug() << Q_FUNC_INFO << "track:" << m_curTrack << "name:" << data << "channel: " << channel;
     m_trackMap[m_curTrack] = rec;
-    m_trkChannel[m_curTrack] = channel;
     appendWRKmetadata(m_curTrack, 0, TextType::TrackName, data);
     wrkUpdateLoadProgress();
 }
@@ -819,7 +737,6 @@ void Sequence::wrkTimeSignatureEvent(int bar, int num, int den)
 void Sequence::wrkKeySig(int bar, int alt)
 {
     //qDebug() << Q_FUNC_INFO << bar << alt;
-
     MIDIEvent *ev = new KeySignatureEvent(alt, false);
     long time = 0;
     foreach(const TimeSigRec& ts, m_bars) {

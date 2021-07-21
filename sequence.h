@@ -68,16 +68,7 @@ public:
     int songLengthTicks() const;
     void updateTempo(qreal newTempo);
     qreal ticks2millis() const { return m_ticks2millis; }
-
-    int getNumTracks() const;
-    int trackMaxPoints();
-    int typeMaxPoints();
-    QByteArray trackName(int track) const;
-    int trackChannel(int track) const;
     QString currentFile() const;
-    void findCodec();
-    int getNumAlterations() const;
-    int lastBar();
 
 signals:
     void loadingStart(int size);
@@ -87,7 +78,6 @@ signals:
 public slots:
     /* SMF slots */
     void smfTrackHandler(int track);
-    void smfTempoTrackHandler();
     void smfErrorHandler(const QString& errorStr);
 
     /* WRK slots */
@@ -144,7 +134,6 @@ private: // members
 
     int m_returnCode;
     int m_format;
-    int m_numTracks;
     int m_ticksDuration;
     int m_division;
     int m_pos;
@@ -197,11 +186,6 @@ private: // members
 
     QString m_currentFile;
     QString m_fileFormat;
-    QByteArray m_trackLabel;
-    QMap<int, QByteArray> m_trkName;
-    QMap<int, int> m_trkScore;
-    QMap<int, int> m_typScore;
-    QMap<int, int> m_trkChannel;
 };
 
 #endif // SEQUENCE_H
