@@ -151,13 +151,7 @@ private: // members
     qint64 m_beatLength;
     qint64 m_tick;
     QString m_lblName;
-
-    struct SysexEventRec {
-        int track;
-        long time;
-        int bank;
-    };
-    QList<SysexEventRec> m_savedSysexEvents;
+    QMap<int, SysExEvent*> m_savedSysexEvents;
 
     struct TrackMapRec {
         int channel;

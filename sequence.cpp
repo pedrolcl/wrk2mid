@@ -124,8 +124,11 @@ void Sequence::clear()
     m_highestMidiNote = 0;
     m_curTrack = 0;
     m_trackMap.clear();
-    m_savedSysexEvents.clear();
     m_textEvents.clear();
+    for(auto it=m_savedSysexEvents.keyBegin(); it != m_savedSysexEvents.keyEnd(); ++it) {
+        delete m_savedSysexEvents[*it];
+    }
+    m_savedSysexEvents.clear();
     for(auto it=m_tracksList.keyBegin(); it != m_tracksList.keyEnd(); ++it) {
         EventsList& list = m_tracksList[*it];
         while (!list.isEmpty()) {
@@ -339,7 +342,7 @@ void Sequence::outputEvent(MIDIEvent* ev)
         if (typeid(*ev) == sysexId) {
             SysExEvent* event = static_cast<SysExEvent*>(ev);
             //qDebug() << event->tick() << "SysEx:"  << event->data().toHex();
-            m_smf->writeMetaEvent(ev->delta(), system_exclusive, event->data());
+            m_smf->writeMidiEvent(ev->delta(), system_exclusive, 0, event->data());
         } else
         if (typeid(*ev) == textId) {
             TextEvent* event = static_cast<TextEvent*>(ev);
@@ -558,26 +561,31 @@ void Sequence::wrkChanPressEvent(int track, long time, int chan, int press)
 
 void Sequence::wrkSysexEvent(int track, long time, int bank)
 {
-    SysexEventRec rec;
-    rec.track = track+1;
-    rec.time = time;
-    rec.bank = bank;
-    m_savedSysexEvents.append(rec);
+    Q_UNUSED(track)
+    //qDebug() << Q_FUNC_INFO;
+    if (m_savedSysexEvents.contains(bank)) {
+        SysExEvent *ev = m_savedSysexEvents[bank]->clone();
+        appendWRKEvent(time, ev);
+    }
     wrkUpdateLoadProgress();
 }
 
-void Sequence::wrkSysexEventBank(int bank, const QString& /*name*/,
-        bool autosend, int /*port*/, const QByteArray& data)
+void Sequence::wrkSysexEventBank(int bank, const QString& name,
+        bool autosend, int port, const QByteArray& data)
 {
+    Q_UNUSED(name)
+    Q_UNUSED(port)
+    //qDebug() << Q_FUNC_INFO << bank << name << autosend << data;
     SysExEvent* ev = new SysExEvent(data);
-    if (autosend)
+    if (autosend) {
+        auto savedTrack = m_curTrack;
+        m_curTrack = 0;
         appendWRKEvent(0, ev->clone());
-    foreach(const SysexEventRec& rec, m_savedSysexEvents) {
-        if (rec.bank == bank) {
-            appendWRKEvent(rec.time, ev->clone());
-        }
+        m_curTrack = savedTrack;
+        delete ev;
+    } else {
+        m_savedSysexEvents[bank] = ev;
     }
-    delete ev;
     wrkUpdateLoadProgress();
 }
 
