@@ -80,6 +80,17 @@ add_subdirectory(docs)
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
+install(FILES ${PROJECT_NAME}.png
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/128x128/apps/)
+
+install(FILES ${PROJECT_NAME}.desktop
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/applications/
+        RENAME net.sourceforge.${PROJECT_NAME}.desktop)
+
+install(FILES ${PROJECT_NAME}.appdata.xml
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo/
+        RENAME net.sourceforge.${PROJECT_NAME}.appdata.xml)
+
 # uninstall target
 if(NOT TARGET uninstall)
   configure_file(

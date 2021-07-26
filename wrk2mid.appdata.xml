@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>net.sourceforge.wrk2mid</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0+</project_license>
+  <name>wrk2mid</name>
+  <summary>Cakewalk to Standard MIDI File Translator</summary>
+  <description>
+    <p>
+      This program is a command line multiplatform converter utility from 
+      Cakewalk files to SMF. It reads .WRK (Cakewalk files), and outputs .MID 
+      (Standard MIDI files).
+    </p>
+  </description>
+  <url type="homepage">https://sourceforge.net/p/wrk2mid/</url>
+  <provides>
+    <binary>wrk2mid</binary>
+  </provides>
+</component>

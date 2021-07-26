@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationVersion(QStringLiteral(QT_STRINGIFY(VERSION)));
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(PGM_DESCRIPTION);
+    parser.setApplicationDescription(PGM_DESCRIPTION + "\nUsing Qt v" + qVersion());
     auto helpOption = parser.addHelpOption();
     auto versionOption = parser.addVersionOption();
     QCommandLineOption formatOption({"f", "format"}, "SMF Format (0/1)", "format", "1");
