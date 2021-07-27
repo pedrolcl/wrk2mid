@@ -75,21 +75,26 @@ if (QT_VERSION VERSION_GREATER_EQUAL 6.0.0)
 endif()
 
 include(GNUInstallDirs)
-set(PROJECT_RELEASE_DATE "July 30, 2021")
-add_subdirectory(docs)
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(FILES ${PROJECT_NAME}.png
-        DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/128x128/apps/)
+if (UNIX)
+    set(PROJECT_RELEASE_DATE "July 30, 2021")
+    add_subdirectory(docs)
 
-install(FILES ${PROJECT_NAME}.desktop
-        DESTINATION ${CMAKE_INSTALL_DATADIR}/applications/
-        RENAME net.sourceforge.${PROJECT_NAME}.desktop)
+    install(FILES ${PROJECT_NAME}.png
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/128x128/apps/)
 
-install(FILES ${PROJECT_NAME}.appdata.xml
-        DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo/
-        RENAME net.sourceforge.${PROJECT_NAME}.appdata.xml)
+    install(FILES ${PROJECT_NAME}.desktop
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/applications/
+            RENAME net.sourceforge.${PROJECT_NAME}.desktop)
+
+    install(FILES ${PROJECT_NAME}.appdata.xml
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo/
+            RENAME net.sourceforge.${PROJECT_NAME}.appdata.xml)
+
+    configure_file(wrktest.in wrktest.sh IMMEDIATE @ONLY)
+endif()
 
 # uninstall target
 if(NOT TARGET uninstall)
@@ -100,8 +105,6 @@ if(NOT TARGET uninstall)
   add_custom_target ( uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
-
-configure_file(wrktest.in wrktest.sh IMMEDIATE @ONLY)
 
 find_package(Git)
 if (Git_FOUND)
@@ -121,19 +124,40 @@ if (Git_FOUND)
     endif()
 endif()
 
-include(InstallRequiredSystemLibraries)
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Cakewalk to Standard MIDI Files Translator")
-set(CPACK_PACKAGE_VENDOR "Drumstick Project")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/readme.md")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}-${PROJECT_VERSION}")
-set(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}" "WRK to SMF Translator")
-if(WIN32 AND NOT UNIX)
-  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/${PROJECT_NAME}.png")
-  set(CPACK_NSIS_CONTACT "plcl@users.sf.net")
-  set(CPACK_NSIS_MODIFY_PATH ON)
-else()
-  set(CPACK_STRIP_FILES "${PROJECT_NAME}")
-  set(CPACK_SOURCE_STRIP_FILES "")
+if (WIN32)
+    file(COPY ${Drumstick_DIR}/lib/libdrumstick-file.dll
+         DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    include(DeploymentUtils)
+    if( MINGW )
+        set( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
+            ${CMAKE_CURRENT_BINARY_DIR}/Qt5Core.dll
+            ${CMAKE_CURRENT_BINARY_DIR}/libgcc_s_seh-1.dll
+            ${CMAKE_CURRENT_BINARY_DIR}/libstdc++-6.dll
+            ${CMAKE_CURRENT_BINARY_DIR}/libwinpthread-1.dll
+            ${CMAKE_CURRENT_BINARY_DIR}/libdrumstick-file.dll
+        )
+    endif()
 endif()
+
+include(InstallRequiredSystemLibraries)
+set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Cakewalk to Standard MIDI Files Translator")
+set (CPACK_PACKAGE_VENDOR "wrk2mid.sourceforge.io")
+set (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/readme.md")
+set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set (CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}-${PROJECT_VERSION}")
+set (CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}" "WRK to SMF Translator")
+set (CPACK_SOURCE_STRIP_FILES OFF)
+set (CPACK_SOURCE_IGNORE_FILES "/.git/;/build/;.user;${CPACK_SOURCE_IGNORE_FILES}")
+
+# Windows NSIS setup package
+if (WIN32)
+    set (CPACK_NSIS_DISPLAY_NAME "Cakewalk to MIDI Files Translator")
+    set (CPACK_NSIS_WELCOME_TITLE_3LINES ON)
+    set (CPACK_NSIS_FINISH_TITLE_3LINES ON)
+    set (CPACK_NSIS_HELP_LINK "https://sourceforge.net/p/wrk2mid")
+    set (CPACK_NSIS_URL_INFO_ABOUT "https://wrk2mid.sourceforge.io")
+    set (CPACK_NSIS_CONTACT "plcl@users.sf.net")
+    set (CPACK_NSIS_MODIFY_PATH ON)
+endif ()
+
 include(CPack)
