@@ -38,7 +38,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
-find_package(Drumstick 2.3 COMPONENTS File REQUIRED)
+find_package(Drumstick 2.3.1 COMPONENTS File REQUIRED)
 
 if(QT_VERSION VERSION_GREATER_EQUAL 6.0.0)
     find_package(Qt6 COMPONENTS Core5Compat REQUIRED)
