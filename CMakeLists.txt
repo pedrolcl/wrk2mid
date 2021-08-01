@@ -20,7 +20,7 @@ cmake_minimum_required(VERSION 3.14)
 
 project(wrk2mid
   LANGUAGES CXX
-  VERSION 1.0.0
+  VERSION 1.0.1
   DESCRIPTION "Command line utility for translating WRK (Cakewalk) files into MID (standard MIDI files)"
   HOMEPAGE_URL "https://sourceforge.net/p/wrk2mid/"
 )
@@ -63,6 +63,7 @@ add_executable(${PROJECT_NAME}
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     VERSION=${PROJECT_VERSION}
+    Drumstick_VERSION=${Drumstick_VERSION}
 )
 
 target_link_libraries(${PROJECT_NAME}

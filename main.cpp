@@ -28,14 +28,19 @@
 int main(int argc, char *argv[])
 {
     const QString PGM_NAME = QStringLiteral("wrk2mid");
-    const QString PGM_DESCRIPTION = QStringLiteral("Command line utility for translating WRK (Cakewalk) files into MID (standard MIDI files)");
+    const QString PGM_VER = QStringLiteral(QT_STRINGIFY(VERSION));
+    const QString DRUMSTICK_VER = QStringLiteral(QT_STRINGIFY(Drumstick_VERSION));
+    const QString PGM_DESCRIPTION = QStringLiteral("Command line utility for translating WRK (Cakewalk) files into MID (standard MIDI files)")
+        + "\n" + PGM_NAME + " v" + PGM_VER
+        + "\nDrumstick v" + DRUMSTICK_VER
+        + "\nQt v" + QT_VERSION_STR + " (running with v" + qVersion() + ")";
 
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName(PGM_NAME);
-    QCoreApplication::setApplicationVersion(QStringLiteral(QT_STRINGIFY(VERSION)));
+    QCoreApplication::setApplicationVersion(PGM_VER);
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(PGM_DESCRIPTION + "\nUsing Qt v" + qVersion());
+    parser.setApplicationDescription(PGM_DESCRIPTION);
     auto helpOption = parser.addHelpOption();
     auto versionOption = parser.addVersionOption();
     QCommandLineOption formatOption({"f", "format"}, "SMF Format (0/1)", "format", "1");
@@ -59,7 +64,8 @@ int main(int argc, char *argv[])
             seq.setOutputFormat(f);
             //qDebug() << "format:" << f;
         } else {
-            std::cerr << "wrong format:" << f << std::endl;
+            std::cerr << "wrong format: " << f << std::endl;
+            std::cerr << parser.helpText().toStdString() << std::endl;
         }
     }
 
