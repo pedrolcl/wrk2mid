@@ -20,7 +20,7 @@ cmake_minimum_required(VERSION 3.14)
 
 project(wrk2mid
   LANGUAGES CXX
-  VERSION 1.0.1
+  VERSION 1.1.0
   DESCRIPTION "Command line utility for translating WRK (Cakewalk) files into MID (standard MIDI files)"
   HOMEPAGE_URL "https://sourceforge.net/p/wrk2mid/"
 )
@@ -38,7 +38,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
-find_package(Drumstick 2.3.1 COMPONENTS File REQUIRED)
+find_package(Drumstick 2.5.0 COMPONENTS File REQUIRED)
 
 if(QT_VERSION VERSION_GREATER_EQUAL 6.0.0)
     find_package(Qt6 COMPONENTS Core5Compat REQUIRED)

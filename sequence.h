@@ -119,6 +119,7 @@ public slots:
     void wrkExpression(int track, long time, int code, const QByteArray& text);
     void wrkTimeSignatureEvent(int bar, int num, int den);
     void wrkKeySig(int bar, int alt);
+    void wrkMarker(long time, int smpte, const QByteArray& data);
 
 private: // methods
     void sort(EventsList& list);
@@ -157,6 +158,7 @@ private: // members
         int channel;
         int pitch;
         int velocity;
+        bool nameSet;
     };
     QMap<int,TrackMapRec> m_trackMap;
 
@@ -180,6 +182,9 @@ private: // members
 
     QString m_currentFile;
     QString m_fileFormat;
+    bool m_timeSignatureSet;
+    bool m_keySignatureSet;
+    bool m_copyrightSet;
 };
 
 #endif // SEQUENCE_H

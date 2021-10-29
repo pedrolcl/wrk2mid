@@ -1,0 +1,8 @@
+2021-10-29
+    * Fix for ticket #1: Convert WRK markers into SMF text markers
+
+2021-08-01
+    * Compiled and runtime library version information
+
+2021-07-30
+    * Release 1.0.0

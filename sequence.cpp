@@ -17,6 +17,7 @@
 */
 
 #include <iostream>
+//#include <QDebug>
 #include <QtMath>
 #include <QFileInfo>
 #include <QRegularExpression>
@@ -44,7 +45,10 @@ Sequence::Sequence(QObject *parent) : QObject(parent),
     m_duration(0),
     m_lastBeat(0),
     m_beatLength(0),
-    m_tick(0)
+    m_tick(0),
+    m_timeSignatureSet(false),
+    m_keySignatureSet(false),
+    m_copyrightSet(false)
 {
     m_smf = new QSmf(this);
     connect(m_smf, &QSmf::signalSMFError, this, &Sequence::smfErrorHandler);
@@ -81,6 +85,7 @@ Sequence::Sequence(QObject *parent) : QObject(parent),
     connect(m_wrk, &QWrk::signalWRKSegment2, this, &Sequence::wrkSegment);
     connect(m_wrk, &QWrk::signalWRKChord, this, &Sequence::wrkChord);
     connect(m_wrk, &QWrk::signalWRKExpression2, this, &Sequence::wrkExpression);
+    connect(m_wrk, &QWrk::signalWRKMarker2, this, &Sequence::wrkMarker);
     clear();
 }
 
@@ -125,6 +130,9 @@ void Sequence::clear()
     m_curTrack = 0;
     m_trackMap.clear();
     m_textEvents.clear();
+    m_timeSignatureSet = false;
+    m_keySignatureSet = false;
+    m_copyrightSet = false;
     for(auto it=m_savedSysexEvents.keyBegin(); it != m_savedSysexEvents.keyEnd(); ++it) {
         delete m_savedSysexEvents[*it];
     }
@@ -480,12 +488,14 @@ void Sequence::wrkTrackHeader( const QByteArray& name1,
     rec.channel = channel;
     rec.pitch = pitch;
     rec.velocity = velocity;
+    rec.nameSet = false;
     m_curTrack = trackno + 1;
     //qDebug() << Q_FUNC_INFO << "track:" << m_curTrack << "name:" << name1 << name2 << "channel:" << channel;
     m_trackMap[m_curTrack] = rec;
     QByteArray trkName = name1 + ' ' + name2;
     trkName = trkName.trimmed();
     if (!trkName.isEmpty()) {
+        m_trackMap[m_curTrack].nameSet = true;
         appendWRKmetadata(m_curTrack, 0, TextType::TrackName, trkName);
     }
     wrkUpdateLoadProgress();
@@ -615,13 +625,20 @@ void Sequence::wrkVariableRecord(const QString &name, const QByteArray &data)
                        name == "Instructions" || name == "Keywords");
     if (isReadable) {
         TextType type = TextType::None;
-        if ( name == "Title" || name == "Subtitle" )
+        if ( name == "Title" || name == "Subtitle" ) {
             type = TextType::TrackName;
-        else if ( name == "Copyright" || name == "Author" )
-            type = TextType::Copyright;
-        else
+        } else if ( name == "Copyright" || name == "Author" ) {
+            if (!m_copyrightSet) {
+                type = TextType::Copyright;
+                m_copyrightSet = true;
+            }
+        } else {
             type = TextType::Text;
-        appendWRKmetadata(1, 0, type, data);
+        }
+
+        if (type != TextType::None) {
+            appendWRKmetadata(0, 0, type, data);
+        }
     }
     wrkUpdateLoadProgress();
 }
@@ -654,6 +671,7 @@ void Sequence::wrkNewTrackHeader( const QByteArray& data,
     rec.channel = channel;
     rec.pitch = pitch;
     rec.velocity = velocity;
+    rec.nameSet = false;
     m_curTrack = trackno + 1;
     //qDebug() << Q_FUNC_INFO << "track:" << m_curTrack << "name:" << data << "channel: " << channel;
     m_trackMap[m_curTrack] = rec;
@@ -663,7 +681,10 @@ void Sequence::wrkNewTrackHeader( const QByteArray& data,
 
 void Sequence::wrkTrackName(int trackno, const QByteArray &data)
 {
-    appendWRKmetadata(trackno+1, 0, TextType::TrackName, data);
+    if (!m_trackMap[m_curTrack].nameSet) {
+        m_trackMap[m_curTrack].nameSet = true;
+        appendWRKmetadata(trackno+1, 0, TextType::TrackName, data);
+    }
 }
 
 void Sequence::wrkTrackVol(int track, int vol)
@@ -714,50 +735,65 @@ void Sequence::wrkExpression(int track, long time, int /*code*/, const QByteArra
 
 void Sequence::wrkTimeSignatureEvent(int bar, int num, int den)
 {
-    MIDIEvent* ev = new TimeSignatureEvent(num, den);
-    m_beatMax = num;
-    m_beatLength = m_division * 4 / den;
+    if (!m_timeSignatureSet) {
+        MIDIEvent* ev = new TimeSignatureEvent(num, den);
+        m_beatMax = num;
+        m_beatLength = m_division * 4 / den;
 
-    TimeSigRec newts;
-    newts.bar = bar;
-    newts.num = num;
-    newts.den = den;
-    newts.time = 0;
-    if (m_bars.isEmpty()) {
-        m_bars.append(newts);
-    } else {
-        bool found = false;
-        foreach(const TimeSigRec& ts, m_bars) {
-            if (ts.bar == bar) {
-                newts.time = ts.time;
-                found = true;
-                break;
+        TimeSigRec newts;
+        newts.bar = bar;
+        newts.num = num;
+        newts.den = den;
+        newts.time = 0;
+        if (m_bars.isEmpty()) {
+            m_bars.append(newts);
+        } else {
+            bool found = false;
+            foreach(const TimeSigRec& ts, m_bars) {
+                if (ts.bar == bar) {
+                    newts.time = ts.time;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                TimeSigRec& lasts = m_bars.last();
+                newts.time = lasts.time +
+                        (lasts.num * 4 * m_division / lasts.den * (bar - lasts.bar));
+                m_bars.append(newts);
             }
         }
-        if (!found) {
-            TimeSigRec& lasts = m_bars.last();
-            newts.time = lasts.time +
-                    (lasts.num * 4 * m_division / lasts.den * (bar - lasts.bar));
-            m_bars.append(newts);
-        }
+        ev->setTag( bar );
+        appendWRKEvent(newts.time, ev);
+        //qDebug() << Q_FUNC_INFO << newts.time << bar << num << den;
+        m_timeSignatureSet = true;
     }
-    ev->setTag( bar );
-    appendWRKEvent(newts.time, ev);
-    //qDebug() << Q_FUNC_INFO << newts.time << bar << num << den;
 }
 
 void Sequence::wrkKeySig(int bar, int alt)
 {
-    //qDebug() << Q_FUNC_INFO << bar << alt;
-    MIDIEvent *ev = new KeySignatureEvent(alt, false);
-    long time = 0;
-    foreach(const TimeSigRec& ts, m_bars) {
-        if (ts.bar == bar) {
-            time = ts.time;
-            break;
+    if (!m_keySignatureSet) {
+        MIDIEvent *ev = new KeySignatureEvent(alt, false);
+        long time = 0;
+        foreach(const TimeSigRec& ts, m_bars) {
+            if (ts.bar == bar) {
+                time = ts.time;
+                break;
+            }
         }
+        appendWRKEvent(time, ev);
+        //qDebug() << Q_FUNC_INFO << time << alt;
+        m_keySignatureSet = true;
     }
-    appendWRKEvent(time, ev);
+}
+
+void Sequence::wrkMarker(long time, int smpte, const QByteArray &data)
+{
+    Q_UNUSED(smpte)
+    //qDebug() << Q_FUNC_INFO << time << smpte << data;
+    if (!data.isEmpty()) {
+        appendWRKmetadata(1, time, TextType::Marker, data);
+    }
 }
 
 void Sequence::wrkEndOfFile()
