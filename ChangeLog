@@ -1,3 +1,6 @@
+2021-11-01
+    * Fix for ticket #2: Convert WRK track Port parameter
+
 2021-10-29
     * Fix for ticket #1: Convert WRK markers into SMF text markers
 

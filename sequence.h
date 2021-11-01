@@ -155,9 +155,11 @@ private: // members
     QMap<int, SysExEvent*> m_savedSysexEvents;
 
     struct TrackMapRec {
+        TrackMapRec(): channel(-1), pitch(-1), velocity(-1), port(-1), nameSet(false) { };
         int channel;
         int pitch;
         int velocity;
+        int port;
         bool nameSet;
     };
     QMap<int,TrackMapRec> m_trackMap;

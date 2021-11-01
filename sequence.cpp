@@ -17,7 +17,6 @@
 */
 
 #include <iostream>
-//#include <QDebug>
 #include <QtMath>
 #include <QFileInfo>
 #include <QRegularExpression>
@@ -153,7 +152,6 @@ bool Sequence::isEmpty()
         EventsList& list = m_tracksList[*it];
         empty |= list.isEmpty();
     }
-    //qDebug() << Q_FUNC_INFO << empty;
     return empty;
 }
 
@@ -397,6 +395,9 @@ void Sequence::smfTrackHandler(int track)
         }
     }
     if (m_tracksList[track].count() > 0) {
+        if (m_trackMap[track].port > -1) {
+            m_smf->writeMetaEvent(0, forced_port, m_trackMap[track].port);
+        }
         //Debug() << Q_FUNC_INFO << "track:" << track << "events:" << m_tracksList[track].count() << "channel:" << m_trkChannel[track];
         for(auto it = m_tracksList[track].cbegin(); it != m_tracksList[track].cend(); ++it) {
             MIDIEvent* ev = *it;
@@ -481,13 +482,14 @@ void Sequence::wrkStreamEndEvent(long time)
 void Sequence::wrkTrackHeader( const QByteArray& name1,
                            const QByteArray& name2,
                            int trackno, int channel,
-                           int pitch, int velocity, int /*port*/,
+                           int pitch, int velocity, int port,
                            bool /*selected*/, bool /*muted*/, bool /*loop*/ )
 {
     TrackMapRec rec;
     rec.channel = channel;
     rec.pitch = pitch;
     rec.velocity = velocity;
+    rec.port = port;
     rec.nameSet = false;
     m_curTrack = trackno + 1;
     //qDebug() << Q_FUNC_INFO << "track:" << m_curTrack << "name:" << name1 << name2 << "channel:" << channel;
@@ -664,18 +666,22 @@ void Sequence::wrkTrackPatch(int track, int patch)
 
 void Sequence::wrkNewTrackHeader( const QByteArray& data,
                               int trackno, int channel,
-                              int pitch, int velocity, int /*port*/,
+                              int pitch, int velocity, int port,
                               bool /*selected*/, bool /*muted*/, bool /*loop*/ )
 {
     TrackMapRec rec;
     rec.channel = channel;
     rec.pitch = pitch;
     rec.velocity = velocity;
+    rec.port = port;
     rec.nameSet = false;
     m_curTrack = trackno + 1;
     //qDebug() << Q_FUNC_INFO << "track:" << m_curTrack << "name:" << data << "channel: " << channel;
     m_trackMap[m_curTrack] = rec;
-    appendWRKmetadata(m_curTrack, 0, TextType::TrackName, data);
+    if (!data.isEmpty()) {
+        m_trackMap[m_curTrack].nameSet = true;
+        appendWRKmetadata(m_curTrack, 0, TextType::TrackName, data);
+    }
     wrkUpdateLoadProgress();
 }
 
