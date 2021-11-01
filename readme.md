@@ -41,7 +41,15 @@ $ cmake .. -DCMAKE_PREFIX_PATH="$HOME/Qt5;$HOME/drumstick2"
 $ make
 $ make install
 ```
+
 You need to replace the contents of the parameter CMAKE_PREFIX_PATH with the actual paths in your system. There are x86_64 precompiled packages for Linux, Windows and macOS at Sourceforge.
+See the CMake documentation for details: https://cmake.org/cmake/help/latest/
+
+You may use Qt5 or Qt6 to build this program. If you have both versions installed system wide, then you should include in the cmake command line the argument USE_QT=5 or USE_QT=6.
+
+### Packaging notes
+
+This program is not a GUI application, obviously. It is a command line application. The reason why there is a `wrk2mid.desktop` file is because it is required to build an AppImage. If you are building another type of distribution package, you probably should omit this file.
 
 ## Downloads
 

@@ -26,17 +26,30 @@ project(wrk2mid
 )
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED)
+option(USE_QT "Choose which Qt major version (5 or 6) to prefer. By default uses whatever is found")
+
+if (USE_QT)
+    if (NOT (USE_QT EQUAL 5 OR USE_QT EQUAL 6))
+        message(FATAL_ERROR "Wrong Qt major version. Only 5 and 6 are valid options")
+    endif()
+endif()
+
+if (USE_QT EQUAL 5)
+    find_package(QT NAMES Qt5)
+elseif (USE_QT EQUAL 6)
+    find_package(QT NAMES Qt6)
+else()
+    find_package(QT NAMES Qt5 Qt6)
+endif()
+
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
 find_package(Drumstick 2.5.0 COMPONENTS File REQUIRED)
 

@@ -1,5 +1,6 @@
 2021-11-01
     * Fix for ticket #2: Convert WRK track Port parameter
+    * Fix for ticket #3: Build option: USE_QT to choose between Qt5 and Qt6
 
 2021-10-29
     * Fix for ticket #1: Convert WRK markers into SMF text markers
