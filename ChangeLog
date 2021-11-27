@@ -1,3 +1,6 @@
+2021-11-27
+    * Added build option: BUILD_DOCS
+
 2021-11-01
     * Fix for ticket #2: Convert WRK track Port parameter
     * Fix for ticket #3: Build option: USE_QT to choose between Qt5 and Qt6

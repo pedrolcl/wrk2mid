@@ -34,6 +34,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
+#set(PROJECT_RELEASE_DATE "November 30, 2021")
+option(BUILD_DOCS "Process Markdown sources of man pages and help files" ON)
 option(USE_QT "Choose which Qt major version (5 or 6) to prefer. By default uses whatever is found")
 
 if (USE_QT)
@@ -93,7 +95,6 @@ install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if (UNIX)
-    set(PROJECT_RELEASE_DATE "July 30, 2021")
     add_subdirectory(docs)
 
     install(FILES ${PROJECT_NAME}.png
