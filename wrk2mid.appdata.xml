@@ -12,8 +12,29 @@
       (Standard MIDI files).
     </p>
   </description>
+  <icon type="stock">wrk2mid</icon>
+  <categories>
+    <category>AudioVideo</category>
+    <category>Midi</category>
+  </categories>
   <url type="homepage">https://sourceforge.net/p/wrk2mid/</url>
+  <releases>
+    <release version="1.1" date="2021-12-10">
+      <description>
+        <ul>
+          <li>New build option: BUILD_DOCS.</li>
+          <li>New Build option: USE_QT to choose between Qt5 and Qt6. Closes ticket #3.</li>
+          <li>Convert WRK track Port parameter. Closes ticket #2.</li>
+          <li>Convert WRK markers into SMF text markers. Closes ticket #1.</li>
+          <li>Displayed compiled and runtime library version information.</li>
+        </ul>
+      </description>
+      <url>https://sourceforge.net/p/wrk2mid/blog/2021/12/wrk2mid-v110-released/</url>
+    </release>
+    <release version="1.0" date="2021-07-30" />
+  </releases>
   <provides>
     <binary>wrk2mid</binary>
   </provides>
 </component>
+

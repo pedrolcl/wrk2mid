@@ -50,8 +50,8 @@ $ make
 $ make install
 ```
 
-You need to replace the contents of the parameter CMAKE_PREFIX_PATH with the actual paths in your system. There are x86_64 precompiled packages for Linux, Windows and macOS at Sourceforge.
-See the CMake documentation for details: https://cmake.org/cmake/help/latest/guide/user-interaction/index.html#introduction
+You need to replace the contents of the parameter CMAKE_PREFIX_PATH with the actual paths in your system. There are precompiled packages at Sourceforge.
+See the [CMake documentation](https://cmake.org/cmake/help/latest/guide/user-interaction/index.html#introduction) for details.
 
 You may use Qt5 or Qt6 to build this program. If you have both versions installed system wide, then you should include in the cmake command line the argument USE_QT=5 or USE_QT=6.
 
@@ -63,7 +63,7 @@ This program is not a GUI application, obviously. It is a command line applicati
 
 [![Download wrk2mid](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/wrk2mid/files/latest/download)
 
-https://sourceforge.net/projects/wrk2mid/files/1.1.0/
+https://sourceforge.net/projects/wrk2mid/files/v1.1.0/
 
 ### Git repository
 
