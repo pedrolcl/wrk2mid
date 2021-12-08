@@ -58,13 +58,13 @@ int main(int argc, char *argv[])
 
     Sequence seq;
     if (parser.isSet(formatOption)) {
+        bool ok;
         QString format = parser.value(formatOption);
-        int f = format.toInt();
-        if (f >= 0 && f <= 1) {
+        int f = format.toInt(&ok);
+        if (ok && f >= 0 && f <= 1) {
             seq.setOutputFormat(f);
-            //qDebug() << "format:" << f;
         } else {
-            std::cerr << "wrong format: " << f << std::endl;
+            std::cerr << "wrong format: " << format.toStdString() << std::endl;
             std::cerr << parser.helpText().toStdString() << std::endl;
         }
     }
@@ -74,14 +74,16 @@ int main(int argc, char *argv[])
         QFileInfo f(a.toString());
         if (f.exists()) {
             fileNames += f.canonicalFilePath();
-            //qDebug() << "input:" << fileNames;
             break;
         } else {
             std::cerr << "file not found:" << f.fileName().toStdString() << std::endl;
         }
     }
 
-    if (!fileNames.isEmpty()) {
+    if (fileNames.isEmpty()) {
+        std::cerr << "invalid arguments" << std::endl;
+        std::cerr << parser.helpText().toStdString() << std::endl;
+    } else {
         QString outfile, infile = fileNames.first();
         if (parser.isSet(outputOption)) {
             outfile = parser.value(outputOption);
@@ -89,7 +91,6 @@ int main(int argc, char *argv[])
             QFileInfo finfo(infile);
             outfile = QDir::current().absoluteFilePath(finfo.baseName() + ".mid");
         }
-        //qDebug() << "output:" << outfile;
         seq.loadFile(infile);
         if (!parser.isSet(testOption) && seq.returnCode() == 0) {
             seq.saveFile(outfile);

@@ -20,14 +20,22 @@ Arguments:
   file                   Input WRK File Name
 ```
 
+## Changes for v1.1.0
+
+* New build option: BUILD_DOCS.
+* New Build option: USE_QT to choose between Qt5 and Qt6. Closes ticket #3.
+* Convert WRK track Port parameter. Closes ticket #2.
+* Convert WRK markers into SMF text markers. Closes ticket #1.
+* Displayed compiled and runtime library version information.
+
 ## Building
 
 Minimum requirements:
 
 * C++11 compiler
 * [Qt5 or Qt6](https://www.qt.io/download)
-* [Drumstick 2.3](https://sourceforge.net/projects/drumstick/)
-* [pandoc](https://pandoc.org/)
+* [Drumstick 2.5](https://sourceforge.net/projects/drumstick/)
+* [pandoc](https://pandoc.org/) (optional, if BUILD_DOCS)
 * [CMake 3.14](https://cmake.org/)
 
 ### Build and deployment commands (for Linux)
@@ -43,7 +51,7 @@ $ make install
 ```
 
 You need to replace the contents of the parameter CMAKE_PREFIX_PATH with the actual paths in your system. There are x86_64 precompiled packages for Linux, Windows and macOS at Sourceforge.
-See the CMake documentation for details: https://cmake.org/cmake/help/latest/
+See the CMake documentation for details: https://cmake.org/cmake/help/latest/guide/user-interaction/index.html#introduction
 
 You may use Qt5 or Qt6 to build this program. If you have both versions installed system wide, then you should include in the cmake command line the argument USE_QT=5 or USE_QT=6.
 
@@ -54,6 +62,8 @@ This program is not a GUI application, obviously. It is a command line applicati
 ## Downloads
 
 [![Download wrk2mid](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/wrk2mid/files/latest/download)
+
+https://sourceforge.net/projects/wrk2mid/files/1.1.0/
 
 ### Git repository
 

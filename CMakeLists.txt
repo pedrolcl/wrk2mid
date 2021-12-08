@@ -34,7 +34,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-#set(PROJECT_RELEASE_DATE "November 30, 2021")
+set(PROJECT_RELEASE_DATE "December 10, 2021")
 option(BUILD_DOCS "Process Markdown sources of man pages and help files" ON)
 option(USE_QT "Choose which Qt major version (5 or 6) to prefer. By default uses whatever is found")
 
@@ -65,7 +65,8 @@ message (STATUS "Cakewalk to Standard MIDI File Translator v${PROJECT_VERSION}
      Operating System: ${CMAKE_SYSTEM_NAME}
      Processor: ${CMAKE_SYSTEM_PROCESSOR}
      Qt Version: ${QT_VERSION}
-     Drumstick Version: ${Drumstick_VERSION}"
+     Drumstick Version: ${Drumstick_VERSION}
+     Build docs: ${BUILD_DOCS}"
 )
 
 add_executable(${PROJECT_NAME}
