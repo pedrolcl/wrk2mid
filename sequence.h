@@ -22,7 +22,6 @@
 #include <QObject>
 #include <QList>
 #include <QMap>
-#include <QTextCodec>
 #include <drumstick/qsmf.h>
 #include <drumstick/qwrk.h>
 #include "events.h"
@@ -81,7 +80,7 @@ public slots:
     void smfErrorHandler(const QString& errorStr);
 
     /* WRK slots */
-    void appendWRKmetadata(int track, long time, TextType typ, const QByteArray &data);
+    void appendWRKmetadata(int track, long time, Sequence::TextType typ, const QByteArray &data);
     void appendWRKEvent(long ticks, MIDIEvent* ev);
     void wrkUpdateLoadProgress();
     void wrkErrorHandler(const QString& errorStr);

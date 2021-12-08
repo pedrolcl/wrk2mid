@@ -601,7 +601,7 @@ void Sequence::wrkSysexEventBank(int bank, const QString& name,
     wrkUpdateLoadProgress();
 }
 
-void Sequence::appendWRKmetadata(int track, long time, TextType type, const QByteArray& data)
+void Sequence::appendWRKmetadata(int track, long time, Sequence::TextType type, const QByteArray& data)
 {
     TextEvent *ev = new TextEvent(data, type);
     ev->setTag(track);

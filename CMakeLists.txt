@@ -57,6 +57,9 @@ find_package(Drumstick 2.5.0 COMPONENTS File REQUIRED)
 
 if(QT_VERSION VERSION_GREATER_EQUAL 6.0.0)
     find_package(Qt6 COMPONENTS Core5Compat REQUIRED)
+    get_target_property(CORE5COMPAT_LIB Qt6::Core5Compat IMPORTED_LOCATION)
+else()
+    unset(CORE5COMPAT_LIB)
 endif()
 
 message (STATUS "Cakewalk to Standard MIDI File Translator v${PROJECT_VERSION}
@@ -87,13 +90,14 @@ target_link_libraries(${PROJECT_NAME}
   Drumstick::File
 )
 
-if (QT_VERSION VERSION_GREATER_EQUAL 6.0.0)
-    target_link_libraries( ${PROJECT_NAME} Qt6::Core5Compat )
+if (UNIX)
+    include(GNUInstallDirs)
+    install(TARGETS ${PROJECT_NAME}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+else()
+    install(TARGETS ${PROJECT_NAME}
+            RUNTIME DESTINATION ".")
 endif()
-
-include(GNUInstallDirs)
-install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if (UNIX)
     add_subdirectory(docs)
@@ -124,8 +128,8 @@ endif()
 
 find_package(Git)
 if (Git_FOUND)
-    find_program(GZIP gzip)
-    find_program(BZIP2 bzip2)
+    find_program(GZIP gzip gzip.exe)
+    find_program(BZIP2 bzip2 bzip2.exe)
     if ((EXISTS ${GZIP}) AND (EXISTS ${BZIP2}))
         set(ARCHNAME ${PROJECT_NAME}-${PROJECT_VERSION})
         add_custom_target ( tarballs
@@ -145,12 +149,14 @@ if (WIN32)
          DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     include(DeploymentUtils)
     if( MINGW )
-        set( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
-            ${CMAKE_CURRENT_BINARY_DIR}/Qt5Core.dll
+        set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "." )
+        set ( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
+            ${CMAKE_CURRENT_BINARY_DIR}/Qt${QT_VERSION_MAJOR}Core.dll
             ${CMAKE_CURRENT_BINARY_DIR}/libgcc_s_seh-1.dll
             ${CMAKE_CURRENT_BINARY_DIR}/libstdc++-6.dll
             ${CMAKE_CURRENT_BINARY_DIR}/libwinpthread-1.dll
             ${CMAKE_CURRENT_BINARY_DIR}/libdrumstick-file.dll
+            ${CORE5COMPAT_LIB}
         )
     endif()
 endif()
