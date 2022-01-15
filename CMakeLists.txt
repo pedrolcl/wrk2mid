@@ -109,9 +109,9 @@ if (UNIX)
             DESTINATION ${CMAKE_INSTALL_DATADIR}/applications/
             RENAME net.sourceforge.${PROJECT_NAME}.desktop)
 
-    install(FILES ${PROJECT_NAME}.appdata.xml
+    install(FILES ${PROJECT_NAME}.metainfo.xml
             DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo/
-            RENAME net.sourceforge.${PROJECT_NAME}.appdata.xml)
+            RENAME net.sourceforge.${PROJECT_NAME}.metainfo.xml)
 
     configure_file(wrktest.in wrktest.sh IMMEDIATE @ONLY)
 endif()
