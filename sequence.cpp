@@ -1,6 +1,6 @@
 /*
     Cakewalk to Standard MIDI Files Command Line Utility Translator
-    Copyright (C) 2021-2022, Pedro Lopez-Cabanillas <plcl@users.sf.net>
+    Copyright (C) 2021-2023, Pedro Lopez-Cabanillas <plcl@users.sf.net>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
