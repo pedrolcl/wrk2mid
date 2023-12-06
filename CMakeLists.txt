@@ -16,44 +16,36 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 #]]
 
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.16)
 
 project(wrk2mid
   LANGUAGES CXX
-  VERSION 1.1.0
+  VERSION 1.1.1
   DESCRIPTION "Command line utility for translating WRK (Cakewalk) files into MID (standard MIDI files)"
-  HOMEPAGE_URL "https://sourceforge.net/p/wrk2mid/"
+  HOMEPAGE_URL "https://wrk2mid.sourceforge.io"
 )
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-set(PROJECT_RELEASE_DATE "December 10, 2021")
+#set(PROJECT_RELEASE_DATE "December 10, 2021")
 option(BUILD_DOCS "Process Markdown sources of man pages and help files" ON)
-option(USE_QT "Choose which Qt major version (5 or 6) to prefer. By default uses whatever is found")
+option(USE_QT5 "Choose to build with Qt5 instead of Qt6" OFF)
 
-if (USE_QT)
-    if (NOT (USE_QT EQUAL 5 OR USE_QT EQUAL 6))
-        message(FATAL_ERROR "Wrong Qt major version. Only 5 and 6 are valid options")
-    endif()
-endif()
-
-if (USE_QT EQUAL 5)
-    find_package(QT NAMES Qt5)
-elseif (USE_QT EQUAL 6)
-    find_package(QT NAMES Qt6)
+if (USE_QT5)
+    find_package(QT NAMES Qt5 REQUIRED)
 else()
-    find_package(QT NAMES Qt5 Qt6)
+    find_package(QT NAMES Qt6 REQUIRED)
 endif()
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
-find_package(Drumstick 2.5.0 COMPONENTS File REQUIRED)
+find_package(Drumstick 2.9 COMPONENTS File REQUIRED)
 
 if(QT_VERSION VERSION_GREATER_EQUAL 6.0.0)
     find_package(Qt6 COMPONENTS Core5Compat REQUIRED)
