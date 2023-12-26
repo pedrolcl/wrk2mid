@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=wrk2mid
-Exec=wrk2mid
+Exec=wrk2mid %f
 Comment=Cakewalk to Standard MIDI File Translator
 Icon=wrk2mid
 Categories=AudioVideo;Audio;Midi;

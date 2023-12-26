@@ -20,7 +20,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(wrk2mid
   LANGUAGES CXX
-  VERSION 1.1.1
+  VERSION 1.2.0
   DESCRIPTION "Command line utility for translating WRK (Cakewalk) files into MID (standard MIDI files)"
   HOMEPAGE_URL "https://wrk2mid.sourceforge.io"
 )
@@ -34,25 +34,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-#set(PROJECT_RELEASE_DATE "December 10, 2021")
+set(PROJECT_RELEASE_DATE "December 26, 2023")
 option(BUILD_DOCS "Process Markdown sources of man pages and help files" ON)
-option(USE_QT5 "Choose to build with Qt5 instead of Qt6" OFF)
+option(USE_QT5 "Prefer building with Qt5 instead of Qt6" OFF)
 
 if (USE_QT5)
     find_package(QT NAMES Qt5 REQUIRED)
+    find_package(Qt5 5.15 COMPONENTS Core REQUIRED)
+    unset(CORE5COMPAT_LIB)
 else()
     find_package(QT NAMES Qt6 REQUIRED)
-endif()
-
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
-find_package(Drumstick 2.9 COMPONENTS File REQUIRED)
-
-if(QT_VERSION VERSION_GREATER_EQUAL 6.0.0)
-    find_package(Qt6 COMPONENTS Core5Compat REQUIRED)
+    find_package(Qt6 6.2 COMPONENTS Core Core5Compat  REQUIRED)
     get_target_property(CORE5COMPAT_LIB Qt6::Core5Compat IMPORTED_LOCATION)
-else()
-    unset(CORE5COMPAT_LIB)
 endif()
+
+find_package(Drumstick 2.9 COMPONENTS File REQUIRED)
 
 message (STATUS "Cakewalk to Standard MIDI File Translator v${PROJECT_VERSION}
      install prefix: ${CMAKE_INSTALL_PREFIX}

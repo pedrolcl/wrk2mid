@@ -1,5 +1,8 @@
+2023-12-26
+    * Release 1.2.0
+
 2023-12-06
-    * Preparations for release 1.1.1:
+    * Preparations for release 1.2.0:
         Building with Qt6 by default.
         For Qt5 compatibility, a new option USE_QT5 must be set.
         Upgraded compiler/runtime requirements to C++17.
