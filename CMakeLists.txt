@@ -140,10 +140,17 @@ if (WIN32)
         set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "." )
         set ( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
             ${CMAKE_CURRENT_BINARY_DIR}/Qt${QT_VERSION_MAJOR}Core.dll
+            ${CMAKE_CURRENT_BINARY_DIR}/libdrumstick-file.dll
             ${CMAKE_CURRENT_BINARY_DIR}/libgcc_s_seh-1.dll
             ${CMAKE_CURRENT_BINARY_DIR}/libstdc++-6.dll
             ${CMAKE_CURRENT_BINARY_DIR}/libwinpthread-1.dll
-            ${CMAKE_CURRENT_BINARY_DIR}/libdrumstick-file.dll
+            ${CMAKE_CURRENT_BINARY_DIR}/libdouble-conversion.dll
+            ${CMAKE_CURRENT_BINARY_DIR}/libicudt74.dll
+            ${CMAKE_CURRENT_BINARY_DIR}/libicuin74.dll
+            ${CMAKE_CURRENT_BINARY_DIR}/libicuuc74.dll
+            ${CMAKE_CURRENT_BINARY_DIR}/libpcre2-16-0.dll
+            ${CMAKE_CURRENT_BINARY_DIR}/libzstd.dll
+            ${CMAKE_CURRENT_BINARY_DIR}/zlib1.dll
             ${CORE5COMPAT_LIB}
         )
     endif()
