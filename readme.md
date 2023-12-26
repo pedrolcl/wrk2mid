@@ -20,40 +20,31 @@ Arguments:
   file                   Input WRK File Name
 ```
 
-## Changes for v1.1.0
-
-* New build option: BUILD_DOCS.
-* New Build option: USE_QT to choose between Qt5 and Qt6. Closes ticket #3.
-* Convert WRK track Port parameter. Closes ticket #2.
-* Convert WRK markers into SMF text markers. Closes ticket #1.
-* Displayed compiled and runtime library version information.
-
 ## Building
 
 Minimum requirements:
 
-* C++11 compiler
-* [Qt5 or Qt6](https://www.qt.io/download)
-* [Drumstick 2.5](https://sourceforge.net/projects/drumstick/)
+* C++17 compiler
+* [Qt6 or Qt5](https://www.qt.io/download)
+* [Drumstick 2.9](https://sourceforge.net/projects/drumstick/)
 * [pandoc](https://pandoc.org/) (optional, if BUILD_DOCS)
-* [CMake 3.14](https://cmake.org/)
+* [CMake 3.16](https://cmake.org/)
 
 ### Build and deployment commands (for Linux)
 
-```
-$ tar -xvzf wrk2mid-x.y.z.tar.gz
-$ cd wrk2mid-x.y.z
-$ mkdir build
-$ cd build
-$ cmake .. -DCMAKE_PREFIX_PATH="$HOME/Qt5;$HOME/drumstick2"
-$ make
-$ make install
+```sh
+    tar xvf wrk2mid-x.y.z.tar.gz
+    cd wrk2mid-x.y.z
+    mkdir build
+    cmake -S . -B build -DCMAKE_PREFIX_PATH="$HOME/Qt5;$HOME/drumstick2"
+    cmake --build build
+    cmake --install build
 ```
 
 You need to replace the contents of the parameter CMAKE_PREFIX_PATH with the actual paths in your system. There are precompiled packages at Sourceforge.
 See the [CMake documentation](https://cmake.org/cmake/help/latest/guide/user-interaction/index.html#introduction) for details.
 
-You may use Qt5 or Qt6 to build this program. If you have both versions installed system wide, then you should include in the cmake command line the argument USE_QT=5 or USE_QT=6.
+You may use Qt6 or Qt5 to build this program. If you prefer Qt5, then you should include in the cmake command line the argument USE_QT5=ON
 
 ### Packaging notes
 
@@ -63,7 +54,7 @@ This program is not a GUI application, obviously. It is a command line applicati
 
 [![Download wrk2mid](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/wrk2mid/files/latest/download)
 
-https://sourceforge.net/projects/wrk2mid/files/v1.1.0/
+https://sourceforge.net/projects/wrk2mid/files/
 
 ### Git repository
 
