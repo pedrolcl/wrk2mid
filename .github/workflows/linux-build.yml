@@ -7,6 +7,7 @@ on:
     branches: [ "devel", "master" ]
   pull_request:
     branches: [ "devel", "master" ]
+  workflow_dispatch:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -22,9 +23,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
-    - uses: dawidd6/action-download-artifact@v3
+    - uses: dawidd6/action-download-artifact@v21
       with:
         name: ${{env.DRUMSTICKNAME}}
         github_token: ${{secrets.GH_PAT}}
@@ -36,9 +37,9 @@ jobs:
       run: tar xvf ${{env.DRUMSTICKNAME}}.tar
 
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
-        version: '6.5.*'
+        version: '6.11.*'
         modules: qt5compat
 
     - name: Dependencies

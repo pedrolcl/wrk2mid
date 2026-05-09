@@ -54,4 +54,4 @@ See Tickets at Sourceforge <https://sourceforge.net/p/wrk2mid/tickets/> and GitH
 
 # SEE ALSO
 
-**qt5options (7)**
+**qtoptions (7)**

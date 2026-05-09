@@ -34,7 +34,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-set(PROJECT_RELEASE_DATE "December 26, 2023")
+set(PROJECT_RELEASE_DATE "May 10, 2026")
 option(BUILD_DOCS "Process Markdown sources of man pages and help files" ON)
 option(USE_QT5 "Prefer building with Qt5 instead of Qt6" OFF)
 

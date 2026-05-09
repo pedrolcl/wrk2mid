@@ -1,0 +1,37 @@
+<h1 id="name">NAME</h1>
+<p><strong>wrk2mid</strong> — Cakewalk to Standard MIDI File Translator</p>
+<h1 id="synopsis">SYNOPSIS</h1>
+<div class="line-block"><strong>wrk2mid</strong> [<strong>-o</strong>|<strong>–output</strong> <em>output_file</em>] [<strong>-f</strong>|<strong>–format</strong> <em>format</em>] [<strong>-t</strong>|<strong>–test</strong>] [<em>input_file</em>]<br />
+<strong>wrk2mid</strong> [<strong>-h</strong>|<strong>–help</strong>|<strong>–help-all</strong>|<strong>-v</strong>|<strong>–version</strong>]</div>
+<h1 id="description">DESCRIPTION</h1>
+<p>This program is a command line multiplatform converter utility from Cakewalk files to SMF. It reads .WRK (Cakewalk files), and outputs .MID (Standard MIDI files).</p>
+<h2 id="options">Options</h2>
+<dl>
+<dt>-h, –help</dt>
+<dd><p>Prints brief usage information.</p>
+</dd>
+<dt>-v, –version</dt>
+<dd><p>Prints the current version number.</p>
+</dd>
+<dt>-f, –format <em>format</em></dt>
+<dd><p>Output SMF format (0/1).</p>
+</dd>
+<dt>-o, –output <em>output_file</em></dt>
+<dd><p>Output file name. By default is the same name as the input file, replacing .WRK with a .MID suffix.</p>
+</dd>
+<dt>-t, –test</dt>
+<dd><p>Test input file only, without producing output except the exit status.</p>
+</dd>
+</dl>
+<h2 id="arguments">Arguments</h2>
+<dl>
+<dt><em>input_file</em></dt>
+<dd><p>Input WRK (Cakewalk) file name.</p>
+</dd>
+</dl>
+<h1 id="exit-status">EXIT STATUS</h1>
+<p>If no errors or warnings are detected, <strong>wrk2mid</strong> exits with status 0. A status of 1 is returned if one or more errors were detected while parsing the Cakewalk input file.</p>
+<h1 id="bugs">BUGS</h1>
+<p>See Tickets at Sourceforge <a href="https://sourceforge.net/p/wrk2mid/tickets/" class="uri">https://sourceforge.net/p/wrk2mid/tickets/</a> and GitHub <a href="https://github.com/pedrolcl/wrk2mid/issues/" class="uri">https://github.com/pedrolcl/wrk2mid/issues/</a></p>
+<h1 id="see-also">SEE ALSO</h1>
+<p><strong>qtoptions (7)</strong></p>
