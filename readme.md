@@ -22,6 +22,8 @@ Arguments:
   file                   Input WRK File Name
 ```
 
+![wincmd.png](wincmd.png)
+
 ## Building
 
 Minimum requirements:
