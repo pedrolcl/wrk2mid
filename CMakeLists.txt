@@ -1,6 +1,6 @@
 #[[
     Cakewalk to Standard MIDI Files Command Line Utility Translator
-    Copyright (C) 2021-2023, Pedro Lopez-Cabanillas <plcl@users.sf.net>
+    Copyright (C) 2021-2026, Pedro Lopez-Cabanillas <plcl@users.sf.net>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(wrk2mid
   LANGUAGES CXX
-  VERSION 1.2.0
+  VERSION 1.2.1
   DESCRIPTION "Command line utility for translating WRK (Cakewalk) files into MID (standard MIDI files)"
   HOMEPAGE_URL "https://wrk2mid.sourceforge.io"
 )
@@ -144,13 +144,6 @@ if (WIN32)
             ${CMAKE_CURRENT_BINARY_DIR}/libgcc_s_seh-1.dll
             ${CMAKE_CURRENT_BINARY_DIR}/libstdc++-6.dll
             ${CMAKE_CURRENT_BINARY_DIR}/libwinpthread-1.dll
-            ${CMAKE_CURRENT_BINARY_DIR}/libdouble-conversion.dll
-            ${CMAKE_CURRENT_BINARY_DIR}/libicudt74.dll
-            ${CMAKE_CURRENT_BINARY_DIR}/libicuin74.dll
-            ${CMAKE_CURRENT_BINARY_DIR}/libicuuc74.dll
-            ${CMAKE_CURRENT_BINARY_DIR}/libpcre2-16-0.dll
-            ${CMAKE_CURRENT_BINARY_DIR}/libzstd.dll
-            ${CMAKE_CURRENT_BINARY_DIR}/zlib1.dll
             ${CORE5COMPAT_LIB}
         )
     endif()
@@ -174,6 +167,7 @@ if (WIN32)
     set (CPACK_NSIS_HELP_LINK "https://sourceforge.net/p/wrk2mid")
     set (CPACK_NSIS_URL_INFO_ABOUT "https://wrk2mid.sourceforge.io")
     set (CPACK_NSIS_CONTACT "plcl@users.sf.net")
+    set (CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
     set (CPACK_NSIS_MODIFY_PATH ON)
 endif ()
 
