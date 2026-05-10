@@ -115,7 +115,7 @@ if(NOT TARGET uninstall)
 endif()
 
 find_package(Git)
-if (Git_FOUND)
+if ((NOT WIN32) AND Git_FOUND)
     find_program(GZIP gzip gzip.exe)
     find_program(BZIP2 bzip2 bzip2.exe)
     if ((EXISTS ${GZIP}) AND (EXISTS ${BZIP2}))
@@ -133,23 +133,56 @@ if (Git_FOUND)
 endif()
 
 if (WIN32)
-    file(COPY ${Drumstick_DIR}/lib/libdrumstick-file.dll
-         DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     include(DeploymentUtils)
+    set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "." )
     if( MINGW )
-        set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "." )
+        file(COPY ${Drumstick_DIR}/lib/libdrumstick-file.dll
+             DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
         set ( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
             ${CMAKE_CURRENT_BINARY_DIR}/Qt${QT_VERSION_MAJOR}Core.dll
             ${CMAKE_CURRENT_BINARY_DIR}/libdrumstick-file.dll
-            ${CMAKE_CURRENT_BINARY_DIR}/libgcc_s_seh-1.dll
-            ${CMAKE_CURRENT_BINARY_DIR}/libstdc++-6.dll
-            ${CMAKE_CURRENT_BINARY_DIR}/libwinpthread-1.dll
             ${CORE5COMPAT_LIB}
+        )
+        # gcc
+        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libgcc_s_seh-1.dll)
+            list (APPEND CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
+                    ${CMAKE_CURRENT_BINARY_DIR}/libgcc_s_seh-1.dll
+            )
+        endif()
+        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libstdc++-6.dll)
+                list (APPEND CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
+                    ${CMAKE_CURRENT_BINARY_DIR}/libstdc++-6.dll
+                )
+        endif()
+        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libwinpthread-1.dll)
+            list (APPEND CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
+                    ${CMAKE_CURRENT_BINARY_DIR}/libwinpthread-1.dll
+                )
+        endif()
+        # clang / llvm
+        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libc++.dll)
+                list (APPEND CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
+                    ${CMAKE_CURRENT_BINARY_DIR}/libc++.dll
+                )
+        endif()
+        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libunwind.dll)
+                list (APPEND CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
+                    ${CMAKE_CURRENT_BINARY_DIR}/libunwind.dll
+                )
+        endif()
+    else() # MSVC
+        file( COPY ${Drumstick_DIR}/lib/drumstick-file.dll
+              DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+        set ( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
+              ${CMAKE_CURRENT_BINARY_DIR}/Qt${QT_VERSION_MAJOR}Core.dll
+              ${CMAKE_CURRENT_BINARY_DIR}/drumstick-file.dll
+              ${CORE5COMPAT_LIB}
         )
     endif()
 endif()
 
 include(InstallRequiredSystemLibraries)
+set (CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR})
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Cakewalk to Standard MIDI Files Translator")
 set (CPACK_PACKAGE_VENDOR "wrk2mid.sourceforge.io")
 set (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/readme.md")
