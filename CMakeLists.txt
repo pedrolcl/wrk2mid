@@ -136,7 +136,7 @@ if (WIN32)
     include(DeploymentUtils)
     set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "." )
     if( MINGW )
-        file(COPY ${Drumstick_DIR}/lib/libdrumstick-file.dll
+        file(COPY ${Drumstick_DIR}/bin/libdrumstick-file.dll
              DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
         set ( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
             ${CMAKE_CURRENT_BINARY_DIR}/Qt${QT_VERSION_MAJOR}Core.dll
@@ -171,7 +171,7 @@ if (WIN32)
                 )
         endif()
     else() # MSVC
-        file( COPY ${Drumstick_DIR}/lib/drumstick-file.dll
+        file( COPY ${Drumstick_DIR}/bin/drumstick-file.dll
               DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
         set ( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
               ${CMAKE_CURRENT_BINARY_DIR}/Qt${QT_VERSION_MAJOR}Core.dll
