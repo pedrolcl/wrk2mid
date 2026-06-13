@@ -19,11 +19,11 @@ jobs:
         include:
           - { icon: '🟦', sys: mingw64,    os: windows-latest }
           - { icon: '🟩', sys: clangarm64, os: windows-11-arm }
-  runs-on: ${{ matrix.os }}
-  name: 🚧${{ matrix.icon }} ${{ matrix.sys }}
-  defaults:
-    run:
-      shell: msys2 {0}
+    runs-on: ${{ matrix.os }}
+    name: 🚧${{ matrix.icon }} ${{ matrix.sys }}
+    defaults:
+      run:
+        shell: msys2 {0}
 
     steps:
     - name: '${{ matrix.icon }} Setup MSYS2'
