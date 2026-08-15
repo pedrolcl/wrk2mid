@@ -35,6 +35,7 @@ jobs:
         repo: pedrolcl/drumstick
         allow_forks: false
         workflow: linux.yml
+        skip_unpack: true
 
     - name: '${{ matrix.icon }} Extract Drumstick'
       run: tar xvzf ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz

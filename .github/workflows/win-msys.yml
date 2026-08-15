@@ -47,12 +47,13 @@ jobs:
     - name: '${{ matrix.icon }} Download Drumstick artifact'
       uses: dawidd6/action-download-artifact@v21
       with:
-        name: ${{env.DRUMSTICK}}-${{ matrix.sys }}.tar.gz
+        name: ${{env.DRUMSTICK}}-msys2-${{ matrix.sys }}.tar.gz
         github_token: ${{secrets.GH_PAT}}
         repo: pedrolcl/drumstick
         allow_forks: false
         workflow: win-msys.yml
         branch: devel
+        skip_unpack: true
 
     - name: '${{ matrix.icon }} Extract downloaded files'
       run: tar xvzf ${{env.DRUMSTICK}}.tar.gz

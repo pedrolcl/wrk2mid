@@ -11,6 +11,7 @@ env:
   BUILD_TYPE: RelWithDebInfo
   DRUMSTICKNAME: DrumstickV2
   DRUMSTICK_LOCATION: ${{github.workspace}}/DrumstickV2
+  INSTALL_LOCATION: ${{github.workspace}}/wrk2mid
 
 jobs:
   build:
