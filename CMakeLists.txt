@@ -136,61 +136,22 @@ if ((NOT WIN32) AND Git_FOUND)
     endif()
 endif()
 
-#[=[
-if (WIN32)
-    include(DeploymentUtils)
-    set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "." )
-    get_target_property(TARGET_CONFIG Drumstick::File IMPORTED_CONFIGURATIONS)
-    get_target_property(DRUMSTICKFILE_DLL Drumstick::File IMPORTED_LOCATION_${TARGET_CONFIG})
-    #message(STATUS ${DRUMSTICKFILE_DLL})
-    if( MINGW )
-        file(COPY ${DRUMSTICKFILE_DLL}
-             DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-        set ( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
-            ${CMAKE_CURRENT_BINARY_DIR}/Qt${QT_VERSION_MAJOR}Core.dll
-            ${CMAKE_CURRENT_BINARY_DIR}/libdrumstick-file.dll
-            ${CORE5COMPAT_LIB}
-        )
-        # gcc
-        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libgcc_s_seh-1.dll)
-            list (APPEND CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
-                    ${CMAKE_CURRENT_BINARY_DIR}/libgcc_s_seh-1.dll
-            )
-        endif()
-        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libstdc++-6.dll)
-                list (APPEND CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
-                    ${CMAKE_CURRENT_BINARY_DIR}/libstdc++-6.dll
-                )
-        endif()
-        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libwinpthread-1.dll)
-            list (APPEND CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
-                    ${CMAKE_CURRENT_BINARY_DIR}/libwinpthread-1.dll
-                )
-        endif()
-        # clang / llvm
-        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libc++.dll)
-                list (APPEND CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
-                    ${CMAKE_CURRENT_BINARY_DIR}/libc++.dll
-                )
-        endif()
-        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libunwind.dll)
-                list (APPEND CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
-                    ${CMAKE_CURRENT_BINARY_DIR}/libunwind.dll
-                )
-        endif()
-    else() # MSVC
-        file( COPY ${DRUMSTICKFILE_DLL}
-              DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-        set ( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
-              ${CMAKE_CURRENT_BINARY_DIR}/Qt${QT_VERSION_MAJOR}Core.dll
-              ${CMAKE_CURRENT_BINARY_DIR}/drumstick-file.dll
-              ${CORE5COMPAT_LIB}
-        )
-    endif()
-endif()
-#]=]
-
 if (QT_VERSION VERSION_GREATER_EQUAL 6.0)
+    install(CODE [[
+      file(GET_RUNTIME_DEPENDENCIES
+        EXECUTABLES $<TARGET_FILE:wrk2mid>
+        RESOLVED_DEPENDENCIES_VAR _r_deps
+        UNRESOLVED_DEPENDENCIES_VAR _u_deps
+        CONFLICTING_DEPENDENCIES_PREFIX _conflicts
+      )
+      foreach(_file ${_r_deps})
+        message(STATUS "Dependency: ${_file}")
+      endforeach()
+      foreach(_file ${_conflicts_FILENAMES})
+        message(STATUS "Conflict: ${_file}")
+        message(STATUS "    Conflict paths: ${_conflicts_${_file}}")
+      endforeach()
+    ]])
     qt_generate_deploy_app_script(
         TARGET ${PROJECT_NAME}
         OUTPUT_SCRIPT deploy_script
