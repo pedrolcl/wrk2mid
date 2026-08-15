@@ -68,7 +68,7 @@ jobs:
 
     - name: '${{ matrix.icon }} Install'
       env:
-        DESTDIR: wrk2mid-v${{steps.configuration.outputs.config_version}}-${{matrix.arch}}.AppDir
+        DESTDIR: ${{github.workspace}}/wrk2mid-v${{steps.configuration.outputs.config_version}}-${{matrix.arch}}.AppDir
       run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: '${{ matrix.icon }} Archive'

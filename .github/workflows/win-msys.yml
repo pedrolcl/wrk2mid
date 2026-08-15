@@ -57,8 +57,8 @@ jobs:
 
     - name: '${{ matrix.icon }} Extract downloaded files'
       run: |
-        mv ${{env.DRUMSTICK}}.tar.gz.zip ${{env.DRUMSTICK}}.tar.gz
-        tar xvzf ${{env.DRUMSTICK}}.tar.gz
+        mv ${{env.DRUMSTICK}}-msys2-${{ matrix.sys }}.tar.gz.zip ${{env.DRUMSTICK}}-msys2-${{ matrix.sys }}.tar.gz
+        tar xvzf ${{env.DRUMSTICK}}-msys2-${{ matrix.sys }}.tar.gz
 
     - name: '${{ matrix.icon }} Configure CMake'
       run: cmake -B ${{github.workspace}}/build
