@@ -85,11 +85,11 @@ jobs:
 
     - name: '${{ matrix.icon }} Upload Installer'
       env:
-        INSTALL_LOCATION: wrk2mid-v${{steps.configuration.outputs.config_version}}-${{matrix.arch}}.setup.exe
+        INSTALL_LOCATION: wrk2mid-v${{steps.configuration.outputs.config_version}}
       uses: actions/upload-artifact@v7
       with:
-        name: ${{env.INSTALL_LOCATION}}
-        path: ${{github.workspace}}/${{env.INSTALL_LOCATION}}
+        name: ${{env.INSTALL_LOCATION}}-msvc-installer-${{matrix.arch}}
+        path: ${{github.workspace}}/build/${{env.INSTALL_LOCATION}}-Windows-*.exe
         retention-days: 90
         overwrite: true
         archive: false

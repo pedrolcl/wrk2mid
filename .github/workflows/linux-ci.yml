@@ -38,7 +38,9 @@ jobs:
         skip_unpack: true
 
     - name: '${{ matrix.icon }} Extract Drumstick'
-      run: tar xvzf ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz
+      run: |
+        mv ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz.zip ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz
+        tar xvzf ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz
 
     - name: '${{ matrix.icon }} Install Qt'
       uses: jurplel/install-qt-action@v4
