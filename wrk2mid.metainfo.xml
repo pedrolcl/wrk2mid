@@ -4,6 +4,9 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0+</project_license>
   <name>wrk2mid</name>
+  <developer id="io.github.pedrolcl">
+    <name>Pedro López-Cabanillas</name>
+  </developer>
   <summary>Cakewalk to Standard MIDI File Translator</summary>
   <description>
     <p>
@@ -12,7 +15,6 @@
       (Standard MIDI files).
     </p>
   </description>
-  <icon type="stock">wrk2mid</icon>
   <categories>
     <category>AudioVideo</category>
     <category>Midi</category>
@@ -27,5 +29,6 @@
   <provides>
     <binary>wrk2mid</binary>
   </provides>
+  <content_rating type="oars-1.1"/>
 </component>
 

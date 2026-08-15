@@ -1,0 +1,93 @@
+name: "Windows MSVC CI"
+
+on:
+  push:
+    branches: [ "master", "devel" ]
+  pull_request:
+    branches: [ "master", "devel" ]
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: RelWithDebInfo
+  DRUMSTICKNAME: DrumstickV2
+  DRUMSTICK_LOCATION: ${{github.workspace}}/DrumstickV2
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { icon: '🟪', arch: "win64", os: "windows-latest" }
+          - { icon: '🟩', arch: "arm64", os: "windows-11-arm" }
+    runs-on: ${{ matrix.os }}
+    name: '${{ matrix.icon }} msvc ${{ matrix.arch }}'
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: '${{ matrix.icon }} Download Drumstick'
+      uses: dawidd6/action-download-artifact@v21
+      with:
+        name: ${{env.DRUMSTICKNAME}}-msvc-${{ matrix.arch }}
+        github_token: ${{secrets.GH_PAT}}
+        repo: pedrolcl/drumstick
+        allow_forks: false
+        workflow: win-msvc.yml
+
+    - name: '${{ matrix.icon }} Install Qt'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.10.*' # bug https://github.com/miurahr/aqtinstall/issues/1007
+        target: desktop
+        modules: qt5compat
+
+    - name: '${{ matrix.icon }} Install NSIS'
+      uses: repolevedavaj/install-nsis@v1.2.1
+      with:
+        nsis-version: '3.11'
+
+    - name: '${{ matrix.icon }} Setup MSVC'
+      uses: TheMrMilchmann/setup-msvc-dev@v4
+      with:
+        arch: ${{ matrix.arch }}
+
+    - name: '${{ matrix.icon }} Configure CMake'
+      id: configuration
+      run: >
+        cmake -G Ninja -B ${{github.workspace}}/build
+        -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        -DCMAKE_PREFIX_PATH=${{env.DRUMSTICK_LOCATION}}
+        -DCMAKE_INSTALL_PREFIX=${{env.INSTALL_LOCATION}}
+        -DCPACK_SYSTEM_NAME=${{matrix.arch}}
+        -DWORKDIR=${{github.workspace}}
+        -DBUILD_DOCS=OFF
+
+    - name: '${{ matrix.icon }} Build'
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: '${{ matrix.icon }} Install'
+      run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: '${{ matrix.icon }} Package'
+      run: cmake --build ${{github.workspace}}/build --target package --config ${{env.BUILD_TYPE}}
+
+    - name: '${{ matrix.icon }} Upload Artifact'
+      uses: actions/upload-artifact@v7
+      with:
+        name: wrk2mid-msvc-${{matrix.arch}}
+        path: ${{env.INSTALL_LOCATION}}
+        retention-days: 90
+        overwrite: true
+        archive: true
+
+    - name: '${{ matrix.icon }} Upload Installer'
+      env:
+        INSTALL_LOCATION: wrk2mid-v${{steps.configuration.outputs.config_version}}-${{matrix.arch}}.setup.exe
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{env.INSTALL_LOCATION}}
+        path: ${{github.workspace}}/${{env.INSTALL_LOCATION}}
+        retention-days: 90
+        overwrite: true
+        archive: false

@@ -20,7 +20,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(wrk2mid
   LANGUAGES CXX
-  VERSION 1.2.1
+  VERSION 1.2.2
   DESCRIPTION "Command line utility for translating WRK (Cakewalk) files into MID (standard MIDI files)"
   HOMEPAGE_URL "https://wrk2mid.sourceforge.io"
 )
@@ -34,7 +34,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-set(PROJECT_RELEASE_DATE "May 10, 2026")
+#set(PROJECT_RELEASE_DATE "May 10, 2026")
 option(BUILD_DOCS "Process Markdown sources of man pages and help files" ON)
 option(USE_QT5 "Prefer building with Qt5 instead of Qt6" OFF)
 
@@ -78,6 +78,12 @@ target_link_libraries(${PROJECT_NAME}
   Drumstick::File
 )
 
+if (QT_VERSION VERSION_GREATER_EQUAL 6.0)
+    target_link_libraries(${PROJECT_NAME}
+        Qt6::Core5Compat
+    )
+endif()
+
 if (UNIX)
     include(GNUInstallDirs)
     install(TARGETS ${PROJECT_NAME}
@@ -91,15 +97,13 @@ if (UNIX)
     add_subdirectory(docs)
 
     install(FILES ${PROJECT_NAME}.png
-            DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/128x128/apps/)
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/256x256/apps/)
 
     install(FILES ${PROJECT_NAME}.desktop
-            DESTINATION ${CMAKE_INSTALL_DATADIR}/applications/
-            RENAME net.sourceforge.${PROJECT_NAME}.desktop)
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/applications/)
 
     install(FILES ${PROJECT_NAME}.metainfo.xml
-            DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo/
-            RENAME net.sourceforge.${PROJECT_NAME}.metainfo.xml)
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo/)
 
     configure_file(wrktest.in wrktest.sh IMMEDIATE @ONLY)
 endif()
@@ -132,6 +136,7 @@ if ((NOT WIN32) AND Git_FOUND)
     endif()
 endif()
 
+#[=[
 if (WIN32)
     include(DeploymentUtils)
     set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "." )
@@ -183,6 +188,39 @@ if (WIN32)
         )
     endif()
 endif()
+#]=]
+
+if (QT_VERSION VERSION_GREATER_EQUAL 6.0)
+    qt_generate_deploy_app_script(
+        TARGET ${PROJECT_NAME}
+        OUTPUT_SCRIPT deploy_script
+        NO_TRANSLATIONS
+        NO_COMPILER_RUNTIME
+        NO_UNSUPPORTED_PLATFORM_ERROR
+    )
+    install(SCRIPT ${deploy_script})
+    if (UNIX AND NOT APPLE AND DEFINED WORKDIR)
+        # AppImage
+        install( CODE
+          "include(${CMAKE_SOURCE_DIR}/cmake/CreateAppImage.cmake)
+           create_appimage(
+                EXE \"${PROJECT_NAME}\"
+                ICON \"${PROJECT_NAME}.png\"
+                DESKTOP \"${PROJECT_NAME}.desktop\"
+                WORKDIR \"${WORKDIR}\"
+                APPDIR \"${PROJECT_NAME}-v${PROJECT_VERSION}-${CMAKE_SYSTEM_PROCESSOR}.AppDir\"
+                ARCH \"${CMAKE_SYSTEM_PROCESSOR}\"
+           )"
+        )
+    endif()
+endif()
+
+if (DEFINED ENV{GITHUB_OUTPUT})
+    file(APPEND
+        "$ENV{GITHUB_OUTPUT}"
+        "config_version=${PROJECT_VERSION}\n"
+    )
+endif()
 
 include(InstallRequiredSystemLibraries)
 set (CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR})
@@ -205,6 +243,6 @@ if (WIN32)
     set (CPACK_NSIS_CONTACT "plcl@users.sf.net")
     set (CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
     set (CPACK_NSIS_MODIFY_PATH ON)
-endif ()
+endif()
 
 include(CPack)
