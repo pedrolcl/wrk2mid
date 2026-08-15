@@ -57,6 +57,7 @@ message (STATUS "Cakewalk to Standard MIDI File Translator v${PROJECT_VERSION}
      Processor: ${CMAKE_SYSTEM_PROCESSOR}
      Qt Version: ${QT_VERSION}
      Drumstick Version: ${Drumstick_VERSION}
+     CMake Version: ${CMAKE_VERSION}
      Build docs: ${BUILD_DOCS}"
 )
 
