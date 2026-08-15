@@ -1,8 +1,8 @@
 # wrk2mid: Cakewalk to Standard MIDI Files Translator
 
-[![Linux CI](https://github.com/pedrolcl/wrk2mid/actions/workflows/linux-build.yml/badge.svg?branch=devel)](https://github.com/pedrolcl/wrk2mid/actions/workflows/linux-build.yml)  
-
-[![Windows CI](https://github.com/pedrolcl/wrk2mid/actions/workflows/windows-ci.yaml/badge.svg?branch=devel)](https://github.com/pedrolcl/wrk2mid/actions/workflows/windows-ci.yaml)  
+[![Linux CI](https://github.com/pedrolcl/wrk2mid/actions/workflows/linux-ci.yml/badge.svg)](https://github.com/pedrolcl/wrk2mid/actions/workflows/linux-ci.yml)  
+[![Windows MSVC CI](https://github.com/pedrolcl/wrk2mid/actions/workflows/win-msvc.yml/badge.svg)](https://github.com/pedrolcl/wrk2mid/actions/workflows/win-msvc.yml)  
+[![Windows MSYS2 CI](https://github.com/pedrolcl/wrk2mid/actions/workflows/win-msys.yml/badge.svg)](https://github.com/pedrolcl/wrk2mid/actions/workflows/win-msys.yml)  
 
 wrk2mid is a command line utility for translating WRK (Cakewalk) files into MID (standard MIDI files) based on [Drumstick](https://drumstick.sourceforge.io/docs/index.html) (a set of GPLv3 licensed C++/Qt libraries for MIDI applications).
 
