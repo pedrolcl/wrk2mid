@@ -27,27 +27,28 @@ jobs:
     steps:
     - uses: actions/checkout@v7
 
-    - uses: dawidd6/action-download-artifact@v21
+    - name: '${{ matrix.icon }} Download Drummstick'
+      uses: dawidd6/action-download-artifact@v21
       with:
-        name: ${{env.DRUMSTICKNAME}}.tar.gz
+        name: ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz
         github_token: ${{secrets.GH_PAT}}
         repo: pedrolcl/drumstick
         allow_forks: false
         workflow: linux.yml
 
-    - name: Extract downloaded files
-      run: tar xvzf ${{env.DRUMSTICKNAME}}.tar.gz
+    - name: '${{ matrix.icon }} Extract Drumstick'
+      run: tar xvzf ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz
 
-    - name: Install Qt
+    - name: '${{ matrix.icon }} Install Qt'
       uses: jurplel/install-qt-action@v4
       with:
         version: '6.11.1'
         modules: qt5compat
 
-    - name: Dependencies
+    - name: '${{ matrix.icon }} Install Dependencies'
       run: sudo apt-get update && sudo apt-get install -yq pkg-config libasound2-dev
 
-    - name: Configure CMake
+    - name: '${{ matrix.icon }} Configure CMake'
       id: configuration
       run: >
         cmake -B ${{github.workspace}}/build
@@ -59,10 +60,10 @@ jobs:
         -DWORKDIR=${{github.workspace}}
         -DBUILD_DOCS=OFF
 
-    - name: Build
+    - name: '${{ matrix.icon }} Build'
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
-    - name: Install
+    - name: '${{ matrix.icon }} Install'
       env:
         DESTDIR: wrk2mid-v${{steps.configuration.outputs.config_version}}-${{matrix.arch}}.AppDir
       run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
@@ -93,4 +94,3 @@ jobs:
         retention-days: 90
         overwrite: true
         archive: false
-

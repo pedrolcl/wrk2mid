@@ -34,6 +34,7 @@ jobs:
         repo: pedrolcl/drumstick
         allow_forks: false
         workflow: win-msvc.yml
+        path: ${{env.DRUMSTICK_LOCATION}}
 
     - name: '${{ matrix.icon }} Install Qt'
       uses: jurplel/install-qt-action@v4

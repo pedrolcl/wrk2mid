@@ -47,7 +47,7 @@ jobs:
     - name: '${{ matrix.icon }} Download Drumstick artifact'
       uses: dawidd6/action-download-artifact@v21
       with:
-        name: ${{env.DRUMSTICK}}-${{ matrix.sys }}
+        name: ${{env.DRUMSTICK}}-${{ matrix.sys }}.tar.gz
         github_token: ${{secrets.GH_PAT}}
         repo: pedrolcl/drumstick
         allow_forks: false
