@@ -46,9 +46,10 @@ else()
     find_package(QT NAMES Qt6 REQUIRED)
     find_package(Qt6 6.2 COMPONENTS Core Core5Compat  REQUIRED)
     get_target_property(CORE5COMPAT_LIB Qt6::Core5Compat IMPORTED_LOCATION)
+    message(STATUS "CORE5COMPAT_LIB: ${CORE5COMPAT_LIB}")
 endif()
 
-find_package(Drumstick 2.9 COMPONENTS File REQUIRED)
+find_package(Drumstick 2.11 COMPONENTS File REQUIRED)
 
 message (STATUS "Cakewalk to Standard MIDI File Translator v${PROJECT_VERSION}
      install prefix: ${CMAKE_INSTALL_PREFIX}
@@ -138,27 +139,19 @@ if ((NOT WIN32) AND Git_FOUND)
 endif()
 
 if (QT_VERSION VERSION_GREATER_EQUAL 6.0)
-    install(CODE [[
-      file(GET_RUNTIME_DEPENDENCIES
-        EXECUTABLES $<TARGET_FILE:wrk2mid>
-        RESOLVED_DEPENDENCIES_VAR _r_deps
-        UNRESOLVED_DEPENDENCIES_VAR _u_deps
-        CONFLICTING_DEPENDENCIES_PREFIX _conflicts
-      )
-      foreach(_file ${_r_deps})
-        message(STATUS "Dependency: ${_file}")
-      endforeach()
-      foreach(_file ${_conflicts_FILENAMES})
-        message(STATUS "Conflict: ${_file}")
-        message(STATUS "    Conflict paths: ${_conflicts_${_file}}")
-      endforeach()
-    ]])
-    qt_generate_deploy_app_script(
+    qt_generate_deploy_script(
         TARGET ${PROJECT_NAME}
         OUTPUT_SCRIPT deploy_script
-        NO_TRANSLATIONS
-        NO_COMPILER_RUNTIME
-        NO_UNSUPPORTED_PLATFORM_ERROR
+        #NO_UNSUPPORTED_PLATFORM_ERROR
+        CONTENT "qt_deploy_runtime_dependencies(
+            EXECUTABLE \"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}\"
+            ADDITIONAL_LIBRARIES \"${CORE5COMPAT_LIB}\"
+            LIB_DIR \"lib\"
+            PLUGINS_DIR \"plugins\"
+            NO_TRANSLATIONS
+            NO_COMPILER_RUNTIME
+            GENERATE_QT_CONF
+            VERBOSE)"
     )
     install(SCRIPT ${deploy_script})
     if (UNIX AND NOT APPLE AND DEFINED WORKDIR)
