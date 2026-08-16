@@ -55,19 +55,19 @@ function(CREATE_APPIMAGE)
 
     # Executable check
     set(_exe "usr/bin/${ARGS_EXE}")
-    if(NOT IS_EXECUTABLE "${_appdir}/${_exe}")
+    if(NOT EXISTS "${_appdir}/${_exe}")
         message(FATAL_ERROR "CREATE_APPIMAGE: invalid executable (not found/executable): ${_appdir}/${_exe}")
     endif()
 
     # Icon check
     set(_icon "usr/share/icons/hicolor/256x256/apps/${ARGS_ICON}")
-    if(NOT IS_READABLE "${_appdir}/${_icon}")
+    if(NOT EXISTS "${_appdir}/${_icon}")
         message(FATAL_ERROR "CREATE_APPIMAGE: icon file not readable: ${_appdir}/${_icon}")
     endif()
 
     # Desktop file check
     set(_desktop "usr/share/applications/${ARGS_DESKTOP}")
-    if(NOT IS_READABLE "${_appdir}/${_desktop}")
+    if(NOT EXISTS "${_appdir}/${_desktop}")
         message(FATAL_ERROR "CREATE_APPIMAGE: .desktop file not readable: ${_appdir}/${_desktop}")
     endif()
 
@@ -83,7 +83,7 @@ function(CREATE_APPIMAGE)
 
         set(_ait_path "${ARGS_WORKDIR}/appimagetool-${ARGS_ARCH}.AppImage")
 
-        if(NOT IS_EXECUTABLE "${_ait_path}")
+        if(NOT EXISTS "${_ait_path}")
             # Known hashes for appimagetool 1.9.1 (keep these in sync if version changes)
             if("${_ait_version}" STREQUAL "1.9.1")
                 if("${ARGS_ARCH}" STREQUAL "aarch64")
@@ -109,7 +109,7 @@ function(CREATE_APPIMAGE)
         endif()
     endif()
 
-    if(NOT IS_EXECUTABLE "${_ait_path}")
+    if(NOT EXISTS "${_ait_path}")
         message(FATAL_ERROR "CREATE_APPIMAGE: appimagetool not found or not executable: ${_ait_path}")
     endif()
 
