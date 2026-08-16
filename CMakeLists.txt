@@ -50,6 +50,10 @@ else()
 endif()
 
 find_package(Drumstick 2.11 COMPONENTS File REQUIRED)
+if (Drumstick_FOUND)
+    get_target_property(DRUMSTICKFILE_LIB Drumstick::File IMPORTED_LOCATION_RELEASE)
+    message(STATUS "Drumstick::File ${DRUMSTICKFILE_LIB}")
+endif()
 
 message (STATUS "Cakewalk to Standard MIDI File Translator v${PROJECT_VERSION}
      install prefix: ${CMAKE_INSTALL_PREFIX}
@@ -144,8 +148,8 @@ if (QT_VERSION VERSION_GREATER_EQUAL 6.0)
         OUTPUT_SCRIPT deploy_script
         #NO_UNSUPPORTED_PLATFORM_ERROR
         CONTENT "qt_deploy_runtime_dependencies(
-            EXECUTABLE \"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}\"
-            ADDITIONAL_LIBRARIES \"${CORE5COMPAT_LIB}\"
+            EXECUTABLE \"$<TARGET_FILE:${PROJECT_NAME}>\"
+            ADDITIONAL_LIBRARIES \"${DRUMSTICKFILE_LIB}\"
             LIB_DIR \"lib\"
             PLUGINS_DIR \"plugins\"
             NO_TRANSLATIONS
