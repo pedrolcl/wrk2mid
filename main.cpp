@@ -43,6 +43,8 @@ int main(int argc, char *argv[])
     parser.setApplicationDescription(PGM_DESCRIPTION);
     auto helpOption = parser.addHelpOption();
     auto versionOption = parser.addVersionOption();
+    QCommandLineOption decoderOption({"d", "decoder"}, "Text decoder", "decoder", "");
+    parser.addOption(decoderOption);
     QCommandLineOption formatOption({"f", "format"}, "SMF Format (0/1)", "format", "1");
     parser.addOption(formatOption);
     QCommandLineOption outputOption({"o", "output"}, "Output file name", "output");
@@ -57,6 +59,10 @@ int main(int argc, char *argv[])
     }
 
     Sequence seq;
+
+    if (parser.isSet(decoderOption)) {
+        seq.setDecoder(parser.value(decoderOption));
+    }
     if (parser.isSet(formatOption)) {
         bool ok;
         QString format = parser.value(formatOption);
