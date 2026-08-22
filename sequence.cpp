@@ -186,7 +186,7 @@ void Sequence::loadFile(const QString& fileName)
             emit loadingFinished();
             for(auto it=m_tracksList.keyBegin(); it!=m_tracksList.keyEnd(); ++it) {
                 EventsList& list = m_tracksList[*it];
-                //qDebug() << "track:" << *it;
+                //qDebug() << Q_FUNC_INFO << "track:" << *it;
                 if (!list.isEmpty()) {
                     sort(list);
                 }
@@ -417,7 +417,8 @@ void Sequence::smfTrackHandler(int track)
         if (m_trackMap[track].port > -1) {
             m_smf->writeMetaEvent(0, forced_port, m_trackMap[track].port);
         }
-        //Debug() << Q_FUNC_INFO << "track:" << track << "events:" << m_tracksList[track].count() << "channel:" << m_trkChannel[track];
+        //qDebug() << Q_FUNC_INFO << "track:" << track << "events:" << m_tracksList[track].count()
+        // << "channel:" << m_trackMap[track].channel;
         for(auto it = m_tracksList[track].cbegin(); it != m_tracksList[track].cend(); ++it) {
             MIDIEvent* ev = *it;
             outputEvent(ev);
@@ -516,7 +517,8 @@ void Sequence::wrkTrackHeader(const QString &name1,
     rec.port = port;
     rec.nameSet = false;
     m_curTrack = trackno + 1;
-    //qDebug() << Q_FUNC_INFO << "track:" << m_curTrack << "name:" << name1 << name2 << "channel:" << channel;
+    //qDebug() << Q_FUNC_INFO << "track:" << m_curTrack << "name:" << name1 << name2
+    // << "channel:" << channel;
     m_trackMap[m_curTrack] = rec;
     QString trkName = name1 + ' ' + name2;
     trkName = trkName.trimmed();
@@ -545,7 +547,8 @@ void Sequence::wrkTrackHeader2(const QByteArray &name1,
     rec.port = port;
     rec.nameSet = false;
     m_curTrack = trackno + 1;
-    //qDebug() << Q_FUNC_INFO << "track:" << m_curTrack << "name:" << name1 << name2 << "channel:" << channel;
+    //qDebug() << Q_FUNC_INFO << "track:" << m_curTrack << "name:" << name1 << name2
+    // << "channel:" << channel;
     m_trackMap[m_curTrack] = rec;
     QByteArray trkName = name1 + ' ' + name2;
     trkName = trkName.trimmed();
@@ -654,8 +657,10 @@ void Sequence::wrkSysexEventBank2(
     wrkUpdateLoadProgress();
 }
 
-void Sequence::wrkTextEvent(int track, long time, int /*typ*/, const QString &data)
+void Sequence::wrkTextEvent(int track, long time, int type, const QString &data)
 {
+    Q_UNUSED(type)
+    //qDebug() << Q_FUNC_INFO << "track:" << track + 1 << "time:" << time << "data:" << data;
     appendWRKmetadata(track + 1, time, TextType::Lyric, data.toUtf8());
 }
 
@@ -667,19 +672,22 @@ void Sequence::appendWRKmetadata(int track, long time, Sequence::TextType type, 
     wrkUpdateLoadProgress();
 }
 
-void Sequence::wrkTextEvent2(int track, long time, int /*type*/, const QByteArray &data)
+void Sequence::wrkTextEvent2(int track, long time, int type, const QByteArray &data)
 {
-    //qDebug() << "track:" << track+1 << "time:" << time << "type:" << type << "data:" << data;
+    Q_UNUSED(type)
+    //qDebug() << Q_FUNC_INFO << "track:" << track + 1 << "time:" << time << "data:" << data;
     appendWRKmetadata(track+1, time, TextType::Lyric, data);
 }
 
 void Sequence::wrkComments(const QString &cmt)
 {
+    //qDebug() << Q_FUNC_INFO << cmt;
     appendWRKmetadata(1, 0, TextType::Text, cmt.toUtf8());
 }
 
 void Sequence::wrkComments2(const QByteArray &cmt)
 {
+    //qDebug() << Q_FUNC_INFO << cmt;
     appendWRKmetadata(1, 0, TextType::Text, cmt);
 }
 
@@ -688,6 +696,7 @@ void Sequence::wrkVariableRecord(const QString &name, const QByteArray &data)
     bool isReadable = (name == "Title" || name == "Author" ||
                        name == "Copyright" || name == "Subtitle" ||
                        name == "Instructions" || name == "Keywords");
+    //qDebug() << Q_FUNC_INFO << name << data;
     if (isReadable) {
         TextType type = TextType::None;
         if ( name == "Title" || name == "Subtitle" ) {
@@ -700,9 +709,15 @@ void Sequence::wrkVariableRecord(const QString &name, const QByteArray &data)
         } else {
             type = TextType::Text;
         }
-
+        QByteArray ba;
+        if (m_wrk->getTextCodec() == nullptr) {
+            ba = data;
+        } else {
+            QString s = m_wrk->getTextCodec()->toUnicode(data);
+            ba = s.toUtf8();
+        }
         if (type != TextType::None) {
-            appendWRKmetadata(0, 0, type, data);
+            appendWRKmetadata(0, 0, type, ba);
         }
     }
     wrkUpdateLoadProgress();
