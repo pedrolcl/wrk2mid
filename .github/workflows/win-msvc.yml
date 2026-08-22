@@ -45,9 +45,9 @@ jobs:
         modules: qt5compat
 
     - name: '${{ matrix.icon }} Install NSIS'
-      uses: repolevedavaj/install-nsis@v1.2.1
+      uses: repolevedavaj/install-nsis@v1.3.0
       with:
-        nsis-version: '3.11'
+        nsis-version: '3.12'
 
     - name: '${{ matrix.icon }} Setup MSVC'
       uses: TheMrMilchmann/setup-msvc-dev@v4
@@ -62,7 +62,6 @@ jobs:
         -DCMAKE_PREFIX_PATH=${{env.DRUMSTICK_LOCATION}}
         -DCMAKE_INSTALL_PREFIX=${{env.INSTALL_LOCATION}}
         -DCPACK_SYSTEM_NAME=${{matrix.arch}}
-        -DWORKDIR=${{github.workspace}}
         -DBUILD_DOCS=OFF
 
     - name: '${{ matrix.icon }} Build'

@@ -60,7 +60,8 @@ Sequence::Sequence(QObject *parent) : QObject(parent),
     connect(m_wrk, &QWrk::signalWRKEnd, this, &Sequence::wrkEndOfFile);
     connect(m_wrk, &QWrk::signalWRKStreamEnd, this, &Sequence::wrkStreamEndEvent);
     connect(m_wrk, &QWrk::signalWRKGlobalVars, this, &Sequence::wrkGlobalVars);
-    connect(m_wrk, &QWrk::signalWRKTrack2, this, &Sequence::wrkTrackHeader);
+    connect(m_wrk, &QWrk::signalWRKTrack, this, &Sequence::wrkTrackHeader);
+    connect(m_wrk, &QWrk::signalWRKTrack2, this, &Sequence::wrkTrackHeader2);
     connect(m_wrk, &QWrk::signalWRKTimeBase, this, &Sequence::wrkTimeBase);
     connect(m_wrk, &QWrk::signalWRKNote, this, &Sequence::wrkNoteEvent);
     connect(m_wrk, &QWrk::signalWRKKeyPress, this, &Sequence::wrkKeyPressEvent);
@@ -69,22 +70,28 @@ Sequence::Sequence(QObject *parent) : QObject(parent),
     connect(m_wrk, &QWrk::signalWRKProgram, this, &Sequence::wrkProgramEvent);
     connect(m_wrk, &QWrk::signalWRKChanPress, this, &Sequence::wrkChanPressEvent);
     connect(m_wrk, &QWrk::signalWRKSysexEvent, this, &Sequence::wrkSysexEvent);
-    connect(m_wrk, &QWrk::signalWRKSysex, this, &Sequence::wrkSysexEventBank);
-    connect(m_wrk, &QWrk::signalWRKText2, this, &Sequence::wrkTextEvent);
+    connect(m_wrk, &QWrk::signalWRKSysex, this, &Sequence::wrkSysexEventBank2);
+    connect(m_wrk, &QWrk::signalWRKText, this, &Sequence::wrkTextEvent);
+    connect(m_wrk, &QWrk::signalWRKText2, this, &Sequence::wrkTextEvent2);
     connect(m_wrk, &QWrk::signalWRKTimeSig, this, &Sequence::wrkTimeSignatureEvent);
     connect(m_wrk, &QWrk::signalWRKKeySig, this, &Sequence::wrkKeySig);
     connect(m_wrk, &QWrk::signalWRKTempo, this, &Sequence::wrkTempoEvent);
     connect(m_wrk, &QWrk::signalWRKTrackPatch, this, &Sequence::wrkTrackPatch);
-    connect(m_wrk, &QWrk::signalWRKComments2, this, &Sequence::wrkComments);
+    connect(m_wrk, &QWrk::signalWRKComments, this, &Sequence::wrkComments);
+    connect(m_wrk, &QWrk::signalWRKComments2, this, &Sequence::wrkComments2);
     connect(m_wrk, &QWrk::signalWRKVariableRecord, this, &Sequence::wrkVariableRecord);
-    connect(m_wrk, &QWrk::signalWRKNewTrack2, this, &Sequence::wrkNewTrackHeader);
-    connect(m_wrk, &QWrk::signalWRKTrackName2, this, &Sequence::wrkTrackName);
+    connect(m_wrk, &QWrk::signalWRKNewTrack, this, &Sequence::wrkNewTrackHeader);
+    connect(m_wrk, &QWrk::signalWRKNewTrack2, this, &Sequence::wrkNewTrackHeader2);
+    connect(m_wrk, &QWrk::signalWRKTrackName, this, &Sequence::wrkTrackName);
+    connect(m_wrk, &QWrk::signalWRKTrackName2, this, &Sequence::wrkTrackName2);
     connect(m_wrk, &QWrk::signalWRKTrackVol, this, &Sequence::wrkTrackVol);
     connect(m_wrk, &QWrk::signalWRKTrackBank, this, &Sequence::wrkTrackBank);
-    connect(m_wrk, &QWrk::signalWRKSegment2, this, &Sequence::wrkSegment);
+    connect(m_wrk, &QWrk::signalWRKSegment, this, &Sequence::wrkSegment);
+    connect(m_wrk, &QWrk::signalWRKSegment2, this, &Sequence::wrkSegment2);
     connect(m_wrk, &QWrk::signalWRKChord, this, &Sequence::wrkChord);
-    connect(m_wrk, &QWrk::signalWRKExpression2, this, &Sequence::wrkExpression);
-    connect(m_wrk, &QWrk::signalWRKMarker2, this, &Sequence::wrkMarker);
+    connect(m_wrk, &QWrk::signalWRKExpression2, this, &Sequence::wrkExpression2);
+    connect(m_wrk, &QWrk::signalWRKMarker, this, &Sequence::wrkMarker);
+    connect(m_wrk, &QWrk::signalWRKMarker2, this, &Sequence::wrkMarker2);
     clear();
 }
 
@@ -179,7 +186,7 @@ void Sequence::loadFile(const QString& fileName)
             emit loadingFinished();
             for(auto it=m_tracksList.keyBegin(); it!=m_tracksList.keyEnd(); ++it) {
                 EventsList& list = m_tracksList[*it];
-                //qDebug() << "track:" << *it;
+                //qDebug() << Q_FUNC_INFO << "track:" << *it;
                 if (!list.isEmpty()) {
                     sort(list);
                 }
@@ -265,6 +272,18 @@ void Sequence::updateTempo(qreal newTempo)
         //qDebug() << Q_FUNC_INFO << newTempo;
         m_tempo = newTempo;
         timeCalculations();
+    }
+}
+
+void Sequence::setDecoder(const QString newDecoder)
+{
+    if (newDecoder.isEmpty()) {
+        m_decoder = nullptr;
+    } else {
+        m_decoder = QTextCodec::codecForName(newDecoder.toLatin1());
+    }
+    if (m_wrk) {
+        m_wrk->setTextCodec(m_decoder);
     }
 }
 
@@ -398,7 +417,8 @@ void Sequence::smfTrackHandler(int track)
         if (m_trackMap[track].port > -1) {
             m_smf->writeMetaEvent(0, forced_port, m_trackMap[track].port);
         }
-        //Debug() << Q_FUNC_INFO << "track:" << track << "events:" << m_tracksList[track].count() << "channel:" << m_trkChannel[track];
+        //qDebug() << Q_FUNC_INFO << "track:" << track << "events:" << m_tracksList[track].count()
+        // << "channel:" << m_trackMap[track].channel;
         for(auto it = m_tracksList[track].cbegin(); it != m_tracksList[track].cend(); ++it) {
             MIDIEvent* ev = *it;
             outputEvent(ev);
@@ -479,11 +499,16 @@ void Sequence::wrkStreamEndEvent(long time)
     wrkUpdateLoadProgress();
 }
 
-void Sequence::wrkTrackHeader( const QByteArray& name1,
-                           const QByteArray& name2,
-                           int trackno, int channel,
-                           int pitch, int velocity, int port,
-                           bool /*selected*/, bool /*muted*/, bool /*loop*/ )
+void Sequence::wrkTrackHeader(const QString &name1,
+                              const QString &name2,
+                              int trackno,
+                              int channel,
+                              int pitch,
+                              int velocity,
+                              int port,
+                              bool /*selected*/,
+                              bool /*muted*/,
+                              bool /*loop*/)
 {
     TrackMapRec rec;
     rec.channel = channel;
@@ -492,7 +517,38 @@ void Sequence::wrkTrackHeader( const QByteArray& name1,
     rec.port = port;
     rec.nameSet = false;
     m_curTrack = trackno + 1;
-    //qDebug() << Q_FUNC_INFO << "track:" << m_curTrack << "name:" << name1 << name2 << "channel:" << channel;
+    //qDebug() << Q_FUNC_INFO << "track:" << m_curTrack << "name:" << name1 << name2
+    // << "channel:" << channel;
+    m_trackMap[m_curTrack] = rec;
+    QString trkName = name1 + ' ' + name2;
+    trkName = trkName.trimmed();
+    if (!trkName.isEmpty()) {
+        m_trackMap[m_curTrack].nameSet = true;
+        appendWRKmetadata(m_curTrack, 0, TextType::TrackName, trkName.toUtf8());
+    }
+    wrkUpdateLoadProgress();
+}
+
+void Sequence::wrkTrackHeader2(const QByteArray &name1,
+                               const QByteArray &name2,
+                               int trackno,
+                               int channel,
+                               int pitch,
+                               int velocity,
+                               int port,
+                               bool /*selected*/,
+                               bool /*muted*/,
+                               bool /*loop*/)
+{
+    TrackMapRec rec;
+    rec.channel = channel;
+    rec.pitch = pitch;
+    rec.velocity = velocity;
+    rec.port = port;
+    rec.nameSet = false;
+    m_curTrack = trackno + 1;
+    //qDebug() << Q_FUNC_INFO << "track:" << m_curTrack << "name:" << name1 << name2
+    // << "channel:" << channel;
     m_trackMap[m_curTrack] = rec;
     QByteArray trkName = name1 + ' ' + name2;
     trkName = trkName.trimmed();
@@ -582,8 +638,8 @@ void Sequence::wrkSysexEvent(int track, long time, int bank)
     wrkUpdateLoadProgress();
 }
 
-void Sequence::wrkSysexEventBank(int bank, const QString& name,
-        bool autosend, int port, const QByteArray& data)
+void Sequence::wrkSysexEventBank2(
+    int bank, const QString &name, bool autosend, int port, const QByteArray &data)
 {
     Q_UNUSED(name)
     Q_UNUSED(port)
@@ -601,6 +657,13 @@ void Sequence::wrkSysexEventBank(int bank, const QString& name,
     wrkUpdateLoadProgress();
 }
 
+void Sequence::wrkTextEvent(int track, long time, int type, const QString &data)
+{
+    Q_UNUSED(type)
+    //qDebug() << Q_FUNC_INFO << "track:" << track + 1 << "time:" << time << "data:" << data;
+    appendWRKmetadata(track + 1, time, TextType::Lyric, data.toUtf8());
+}
+
 void Sequence::appendWRKmetadata(int track, long time, Sequence::TextType type, const QByteArray& data)
 {
     TextEvent *ev = new TextEvent(data, type);
@@ -609,14 +672,22 @@ void Sequence::appendWRKmetadata(int track, long time, Sequence::TextType type, 
     wrkUpdateLoadProgress();
 }
 
-void Sequence::wrkTextEvent(int track, long time, int /*type*/, const QByteArray &data)
+void Sequence::wrkTextEvent2(int track, long time, int type, const QByteArray &data)
 {
-    //qDebug() << "track:" << track+1 << "time:" << time << "type:" << type << "data:" << data;
+    Q_UNUSED(type)
+    //qDebug() << Q_FUNC_INFO << "track:" << track + 1 << "time:" << time << "data:" << data;
     appendWRKmetadata(track+1, time, TextType::Lyric, data);
 }
 
-void Sequence::wrkComments(const QByteArray &cmt)
+void Sequence::wrkComments(const QString &cmt)
 {
+    //qDebug() << Q_FUNC_INFO << cmt;
+    appendWRKmetadata(1, 0, TextType::Text, cmt.toUtf8());
+}
+
+void Sequence::wrkComments2(const QByteArray &cmt)
+{
+    //qDebug() << Q_FUNC_INFO << cmt;
     appendWRKmetadata(1, 0, TextType::Text, cmt);
 }
 
@@ -625,6 +696,7 @@ void Sequence::wrkVariableRecord(const QString &name, const QByteArray &data)
     bool isReadable = (name == "Title" || name == "Author" ||
                        name == "Copyright" || name == "Subtitle" ||
                        name == "Instructions" || name == "Keywords");
+    //qDebug() << Q_FUNC_INFO << name << data;
     if (isReadable) {
         TextType type = TextType::None;
         if ( name == "Title" || name == "Subtitle" ) {
@@ -637,9 +709,15 @@ void Sequence::wrkVariableRecord(const QString &name, const QByteArray &data)
         } else {
             type = TextType::Text;
         }
-
+        QByteArray ba;
+        if (m_wrk->getTextCodec() == nullptr) {
+            ba = data;
+        } else {
+            QString s = m_wrk->getTextCodec()->toUnicode(data);
+            ba = s.toUtf8();
+        }
         if (type != TextType::None) {
-            appendWRKmetadata(0, 0, type, data);
+            appendWRKmetadata(0, 0, type, ba);
         }
     }
     wrkUpdateLoadProgress();
@@ -664,10 +742,41 @@ void Sequence::wrkTrackPatch(int track, int patch)
     //qDebug() << Q_FUNC_INFO << track << patch;
 }
 
-void Sequence::wrkNewTrackHeader( const QByteArray& data,
-                              int trackno, int channel,
-                              int pitch, int velocity, int port,
-                              bool /*selected*/, bool /*muted*/, bool /*loop*/ )
+void Sequence::wrkNewTrackHeader(const QString &data,
+                                 int trackno,
+                                 int channel,
+                                 int pitch,
+                                 int velocity,
+                                 int port,
+                                 bool /*selected*/,
+                                 bool /*muted*/,
+                                 bool /*loop*/)
+{
+    TrackMapRec rec;
+    rec.channel = channel;
+    rec.pitch = pitch;
+    rec.velocity = velocity;
+    rec.port = port;
+    rec.nameSet = false;
+    m_curTrack = trackno + 1;
+    //qDebug() << Q_FUNC_INFO << "track:" << m_curTrack << "name:" << data << "channel: " << channel;
+    m_trackMap[m_curTrack] = rec;
+    if (!data.isEmpty()) {
+        m_trackMap[m_curTrack].nameSet = true;
+        appendWRKmetadata(m_curTrack, 0, TextType::TrackName, data.toUtf8());
+    }
+    wrkUpdateLoadProgress();
+}
+
+void Sequence::wrkNewTrackHeader2(const QByteArray &data,
+                                  int trackno,
+                                  int channel,
+                                  int pitch,
+                                  int velocity,
+                                  int port,
+                                  bool /*selected*/,
+                                  bool /*muted*/,
+                                  bool /*loop*/)
 {
     TrackMapRec rec;
     rec.channel = channel;
@@ -685,7 +794,15 @@ void Sequence::wrkNewTrackHeader( const QByteArray& data,
     wrkUpdateLoadProgress();
 }
 
-void Sequence::wrkTrackName(int trackno, const QByteArray &data)
+void Sequence::wrkTrackName(int trackno, const QString &data)
+{
+    if (!m_trackMap[m_curTrack].nameSet) {
+        m_trackMap[m_curTrack].nameSet = true;
+        appendWRKmetadata(trackno + 1, 0, TextType::TrackName, data.toUtf8());
+    }
+}
+
+void Sequence::wrkTrackName2(int trackno, const QByteArray &data)
 {
     if (!m_trackMap[m_curTrack].nameSet) {
         m_trackMap[m_curTrack].nameSet = true;
@@ -721,20 +838,27 @@ void Sequence::wrkTrackBank(int track, int bank)
     wrkCtlChangeEvent(track+1, 0, channel, ControllerEvent::MIDI_CTL_LSB_BANK, lsb);
 }
 
-void Sequence::wrkSegment(int track, long time, const QByteArray &name)
+void Sequence::wrkSegment(int track, long time, const QString &name)
+{
+    if (!name.isEmpty()) {
+        appendWRKmetadata(track + 1, time, TextType::Marker, name.toUtf8());
+    }
+}
+
+void Sequence::wrkSegment2(int track, long time, const QByteArray &name)
 {
     if (!name.isEmpty()) {
         appendWRKmetadata(track+1, time, TextType::Marker, name);
     }
 }
 
-void Sequence::wrkChord(int track, long time, const QString &name, const QByteArray& /*data*/)
+void Sequence::wrkChord(int track, long time, const QString &name, const QByteArray & /*data*/)
 {
     QByteArray data = name.toUtf8();
     appendWRKmetadata(track+1, time, TextType::Cue, data);
 }
 
-void Sequence::wrkExpression(int track, long time, int /*code*/, const QByteArray &text)
+void Sequence::wrkExpression2(int track, long time, int /*code*/, const QByteArray &text)
 {
     appendWRKmetadata(track+1, time, TextType::Cue, text);
 }
@@ -793,7 +917,16 @@ void Sequence::wrkKeySig(int bar, int alt)
     }
 }
 
-void Sequence::wrkMarker(long time, int smpte, const QByteArray &data)
+void Sequence::wrkMarker(long time, int smpte, const QString &data)
+{
+    Q_UNUSED(smpte)
+    //qDebug() << Q_FUNC_INFO << time << smpte << data;
+    if (!data.isEmpty()) {
+        appendWRKmetadata(1, time, TextType::Marker, data.toUtf8());
+    }
+}
+
+void Sequence::wrkMarker2(long time, int smpte, const QByteArray &data)
 {
     Q_UNUSED(smpte)
     //qDebug() << Q_FUNC_INFO << time << smpte << data;

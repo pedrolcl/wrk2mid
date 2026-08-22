@@ -19,9 +19,11 @@
 #ifndef SEQUENCE_H
 #define SEQUENCE_H
 
-#include <QObject>
 #include <QList>
 #include <QMap>
+#include <QObject>
+#include <QTextCodec>
+
 #include <drumstick/qsmf.h>
 #include <drumstick/qwrk.h>
 #include "events.h"
@@ -69,6 +71,8 @@ public:
     qreal ticks2millis() const { return m_ticks2millis; }
     QString currentFile() const;
 
+    void setDecoder(const QString newDecoder);
+
 signals:
     void loadingStart(int size);
     void loadingProgress(int pos);
@@ -87,10 +91,26 @@ public slots:
     void wrkFileHeader(int verh, int verl);
     void wrkEndOfFile();
     void wrkStreamEndEvent(long time);
-    void wrkTrackHeader(const QByteArray& name1, const QByteArray& name2,
-             int trackno, int channel, int pitch,
-             int velocity, int port,
-             bool selected, bool muted, bool loop);
+    void wrkTrackHeader(const QString &name1,
+                        const QString &name2,
+                        int trackno,
+                        int channel,
+                        int pitch,
+                        int velocity,
+                        int port,
+                        bool selected,
+                        bool muted,
+                        bool loop);
+    void wrkTrackHeader2(const QByteArray &name1,
+                         const QByteArray &name2,
+                         int trackno,
+                         int channel,
+                         int pitch,
+                         int velocity,
+                         int port,
+                         bool selected,
+                         bool muted,
+                         bool loop);
     void wrkTimeBase(int timebase);
     void wrkGlobalVars();
     void wrkNoteEvent(int track, long time, int chan, int pitch, int vol, int dur);
@@ -100,25 +120,45 @@ public slots:
     void wrkProgramEvent(int track, long time, int chan, int patch);
     void wrkChanPressEvent(int track, long time, int chan, int press);
     void wrkSysexEvent(int track, long time, int bank);
-    void wrkSysexEventBank(int bank, const QString& name, bool autosend, int port, const QByteArray& data);
-    void wrkTextEvent(int track, long time, int typ, const QByteArray& data);
-    void wrkComments(const QByteArray& cmt);
-    void wrkVariableRecord(const QString& name, const QByteArray& data);
+    void wrkSysexEventBank2(
+        int bank, const QString &name, bool autosend, int port, const QByteArray &data);
+    void wrkTextEvent(int track, long time, int typ, const QString &data);
+    void wrkTextEvent2(int track, long time, int typ, const QByteArray &data);
+    void wrkComments(const QString &cmt);
+    void wrkComments2(const QByteArray &cmt);
+    void wrkVariableRecord(const QString &name, const QByteArray &data);
     void wrkTempoEvent(long time, int tempo);
     void wrkTrackPatch(int track, int patch);
-    void wrkNewTrackHeader(const QByteArray& name,
-            int trackno, int channel, int pitch,
-            int velocity, int port,
-            bool selected, bool muted, bool loop);
-    void wrkTrackName(int trackno, const QByteArray& name);
+    void wrkNewTrackHeader(const QString &name,
+                           int trackno,
+                           int channel,
+                           int pitch,
+                           int velocity,
+                           int port,
+                           bool selected,
+                           bool muted,
+                           bool loop);
+    void wrkNewTrackHeader2(const QByteArray &name,
+                            int trackno,
+                            int channel,
+                            int pitch,
+                            int velocity,
+                            int port,
+                            bool selected,
+                            bool muted,
+                            bool loop);
+    void wrkTrackName(int trackno, const QString &name);
+    void wrkTrackName2(int trackno, const QByteArray &name);
     void wrkTrackVol(int track, int vol);
     void wrkTrackBank(int track, int bank);
-    void wrkSegment(int track, long time, const QByteArray& name);
-    void wrkChord(int track, long time, const QString& name, const QByteArray& data);
-    void wrkExpression(int track, long time, int code, const QByteArray& text);
+    void wrkSegment(int track, long time, const QString &name);
+    void wrkSegment2(int track, long time, const QByteArray &name);
+    void wrkChord(int track, long time, const QString &name, const QByteArray &data);
+    void wrkExpression2(int track, long time, int code, const QByteArray &text);
     void wrkTimeSignatureEvent(int bar, int num, int den);
     void wrkKeySig(int bar, int alt);
-    void wrkMarker(long time, int smpte, const QByteArray& data);
+    void wrkMarker(long time, int smpte, const QString &data);
+    void wrkMarker2(long time, int smpte, const QByteArray &data);
 
 private: // methods
     void sort(EventsList& list);
@@ -129,8 +169,9 @@ private: // methods
 
 private: // members
     QMap<int, EventsList> m_tracksList;
-    drumstick::File::QSmf* m_smf;
-    drumstick::File::QWrk* m_wrk;
+    drumstick::File::QSmf *m_smf;
+    drumstick::File::QWrk *m_wrk;
+    QTextCodec *m_decoder{nullptr};
 
     int m_returnCode;
     int m_format;
@@ -154,7 +195,13 @@ private: // members
     QMap<int, SysExEvent*> m_savedSysexEvents;
 
     struct TrackMapRec {
-        TrackMapRec(): channel(-1), pitch(-1), velocity(-1), port(-1), nameSet(false) { };
+        TrackMapRec()
+            : channel(-1)
+            , pitch(-1)
+            , velocity(-1)
+            , port(-1)
+            , nameSet(false)
+        {}
         int channel;
         int pitch;
         int velocity;
@@ -172,8 +219,18 @@ private: // members
     QList<TimeSigRec> m_bars;
 
     struct TextRec {
-        TextRec(QByteArray data): m_tick(0), m_track(0), m_type(TextType::None), m_text(data) { };
-        TextRec(int tick, int track, TextType e, QByteArray data): m_tick(tick), m_track(track), m_type(e), m_text(data) { };
+        TextRec(QByteArray data)
+            : m_tick(0)
+            , m_track(0)
+            , m_type(TextType::None)
+            , m_text(data)
+        {}
+        TextRec(int tick, int track, TextType e, QByteArray data)
+            : m_tick(tick)
+            , m_track(track)
+            , m_type(e)
+            , m_text(data)
+        {}
         int m_tick;
         int m_track;
         TextType m_type;

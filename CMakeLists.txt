@@ -46,17 +46,12 @@ else()
     find_package(QT NAMES Qt6 REQUIRED)
     find_package(Qt6 6.2 COMPONENTS Core Core5Compat  REQUIRED)
     get_target_property(CORE5COMPAT_LIB Qt6::Core5Compat IMPORTED_LOCATION)
-    message(STATUS "CORE5COMPAT_LIB: ${CORE5COMPAT_LIB}")
 endif()
 
 find_package(Drumstick 2.11 COMPONENTS File REQUIRED)
-if (Drumstick_FOUND)
-    get_target_property(DRUMSTICKFILE_LIB Drumstick::File IMPORTED_LOCATION_RELEASE)
-    message(STATUS "Drumstick::File ${DRUMSTICKFILE_LIB}")
-endif()
 
 message (STATUS "Cakewalk to Standard MIDI File Translator v${PROJECT_VERSION}
-     install prefix: ${CMAKE_INSTALL_PREFIX}
+     Install prefix: ${CMAKE_INSTALL_PREFIX}
      Build configuration: ${CMAKE_BUILD_TYPE}
      Operating System: ${CMAKE_SYSTEM_NAME}
      Processor: ${CMAKE_SYSTEM_PROCESSOR}
@@ -78,6 +73,12 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     VERSION=${PROJECT_VERSION}
     Drumstick_VERSION=${Drumstick_VERSION}
 )
+
+if (NOT MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        -Wno-deprecated-declarations
+    )
+endif()
 
 target_link_libraries(${PROJECT_NAME}
   Qt${QT_VERSION_MAJOR}::Core
@@ -143,19 +144,12 @@ if ((NOT WIN32) AND Git_FOUND)
 endif()
 
 if (QT_VERSION VERSION_GREATER_EQUAL 6.0)
-    qt_generate_deploy_script(
+    qt_generate_deploy_app_script(
         TARGET ${PROJECT_NAME}
         OUTPUT_SCRIPT deploy_script
-        #NO_UNSUPPORTED_PLATFORM_ERROR
-        CONTENT "qt_deploy_runtime_dependencies(
-            EXECUTABLE \"$<TARGET_FILE:${PROJECT_NAME}>\"
-            ADDITIONAL_LIBRARIES \"${DRUMSTICKFILE_LIB}\"
-            LIB_DIR \"lib\"
-            PLUGINS_DIR \"plugins\"
-            NO_TRANSLATIONS
-            NO_COMPILER_RUNTIME
-            GENERATE_QT_CONF
-            VERBOSE)"
+        NO_UNSUPPORTED_PLATFORM_ERROR
+        NO_TRANSLATIONS
+        NO_COMPILER_RUNTIME
     )
     install(SCRIPT ${deploy_script})
     if (UNIX AND NOT APPLE AND DEFINED WORKDIR)
