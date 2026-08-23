@@ -55,6 +55,7 @@ jobs:
         branch: devel
         skip_unpack: true
 
+    # this should not be needed
     - name: '${{ matrix.icon }} Extract downloaded files'
       run: |
         if [ -f ${{env.DRUMSTICK}}-msys2-${{ matrix.sys }}.tar.gz.zip ]; then
