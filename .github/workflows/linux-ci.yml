@@ -37,6 +37,7 @@ jobs:
         workflow: linux.yml
         skip_unpack: true
 
+    # this should not be needed
     - name: '${{ matrix.icon }} Extract Drumstick'
       run: |
         if [ -f ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz.zip ]; then
