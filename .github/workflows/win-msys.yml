@@ -57,7 +57,9 @@ jobs:
 
     - name: '${{ matrix.icon }} Extract downloaded files'
       run: |
-        mv ${{env.DRUMSTICK}}-msys2-${{ matrix.sys }}.tar.gz.zip ${{env.DRUMSTICK}}-msys2-${{ matrix.sys }}.tar.gz
+        if [ -f ${{env.DRUMSTICK}}-msys2-${{ matrix.sys }}.tar.gz.zip ]; then
+          mv ${{env.DRUMSTICK}}-msys2-${{ matrix.sys }}.tar.gz.zip ${{env.DRUMSTICK}}-msys2-${{ matrix.sys }}.tar.gz
+        fi
         tar xvzf ${{env.DRUMSTICK}}-msys2-${{ matrix.sys }}.tar.gz
 
     - name: '${{ matrix.icon }} Configure CMake'

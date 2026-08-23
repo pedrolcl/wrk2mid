@@ -39,7 +39,9 @@ jobs:
 
     - name: '${{ matrix.icon }} Extract Drumstick'
       run: |
-        mv ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz.zip ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz
+        if [ -f ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz.zip ]; then
+          mv ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz.zip ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz
+        fi
         tar xvzf ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz
 
     - name: '${{ matrix.icon }} Install Qt'
