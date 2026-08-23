@@ -27,7 +27,7 @@ jobs:
     steps:
     - uses: actions/checkout@v7
 
-    - name: '${{ matrix.icon }} Download Drummstick'
+    - name: '${{ matrix.icon }} Download Drumstick artifact'
       uses: dawidd6/action-download-artifact@v23
       with:
         name: ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz
@@ -37,7 +37,7 @@ jobs:
         workflow: linux.yml
         skip_unpack: true
 
-    - name: '${{ matrix.icon }} Extract Drumstick'
+    - name: '${{ matrix.icon }} Extract Drumstick artifact'
       run: |
         if [ -f ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz.zip ]; then
           mv ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz.zip ${{env.DRUMSTICKNAME}}-${{matrix.arch}}.tar.gz
