@@ -62,7 +62,6 @@ jobs:
         -DCMAKE_INSTALL_LIBDIR=lib
         -DCMAKE_PREFIX_PATH="${{env.DRUMSTICK_LOCATION}}"
         -DCMAKE_INSTALL_RPATH="\$ORIGIN/../lib"
-        -DWORKDIR=${{github.workspace}}
         -DBUILD_DOCS=OFF
 
     - name: '${{ matrix.icon }} Build'
@@ -70,13 +69,15 @@ jobs:
 
     - name: '${{ matrix.icon }} Install'
       env:
-        DESTDIR: ${{github.workspace}}/wrk2mid-v${{steps.configuration.outputs.config_version}}-${{matrix.arch}}.AppDir
+        DESTDIR: ${{github.workspace}}/build/wrk2mid-v${{steps.configuration.outputs.config_version}}-${{matrix.arch}}.AppDir
       run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: '${{ matrix.icon }} Archive'
       env:
         INSTALL_LOCATION: wrk2mid-v${{steps.configuration.outputs.config_version}}-${{matrix.arch}}.AppDir
-      run: tar -cvzf ${{env.INSTALL_LOCATION}}.tar.gz ${{env.INSTALL_LOCATION}}
+      run: |
+        cd ${{github.workspace}}/build/
+        tar -cvzf ${{env.INSTALL_LOCATION}}.tar.gz ${{env.INSTALL_LOCATION}}
 
     - name: '${{ matrix.icon }} Upload Archive'
       env:
@@ -84,7 +85,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: ${{env.INSTALL_LOCATION}}
-        path: ${{github.workspace}}/${{env.INSTALL_LOCATION}}.tar.gz
+        path: ${{github.workspace}}/build/${{env.INSTALL_LOCATION}}.tar.gz
         retention-days: 90
         overwrite: true
         archive: false
@@ -95,7 +96,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: ${{env.INSTALL_LOCATION}}
-        path: ${{github.workspace}}/${{env.INSTALL_LOCATION}}
+        path: ${{github.workspace}}/build/${{env.INSTALL_LOCATION}}
         retention-days: 90
         overwrite: true
         archive: false
