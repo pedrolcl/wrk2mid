@@ -46,6 +46,7 @@ else()
     find_package(QT NAMES Qt6 REQUIRED)
     find_package(Qt6 6.2 COMPONENTS Core Core5Compat  REQUIRED)
     get_target_property(CORE5COMPAT_LIB Qt6::Core5Compat IMPORTED_LOCATION)
+    get_target_property(CORE_LIB Qt6::Core IMPORTED_LOCATION)
 endif()
 
 find_package(Drumstick 2.11 COMPONENTS File REQUIRED)
@@ -96,6 +97,7 @@ if (UNIX)
     install(TARGETS ${PROJECT_NAME}
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 else()
+    set(CMAKE_INSTALL_BINDIR ".")
     install(TARGETS ${PROJECT_NAME}
             RUNTIME DESTINATION ".")
 endif()
@@ -144,15 +146,29 @@ if ((NOT WIN32) AND Git_FOUND)
 endif()
 
 if (QT_VERSION VERSION_GREATER_EQUAL 6.0)
-    qt_generate_deploy_app_script(
-        TARGET ${PROJECT_NAME}
-        OUTPUT_SCRIPT deploy_script
-        NO_UNSUPPORTED_PLATFORM_ERROR
-        NO_TRANSLATIONS
-        NO_COMPILER_RUNTIME
-    )
-    install(SCRIPT ${deploy_script})
-    if (UNIX AND NOT APPLE AND DEFINED WORKDIR)
+    if (WIN32)
+        set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "." )
+        get_target_property(TARGET_CONFIG Drumstick::File IMPORTED_CONFIGURATIONS)
+        get_target_property(DRUMSTICKFILE_LIB Drumstick::File IMPORTED_LOCATION_${TARGET_CONFIG})
+        # message(STATUS "DRUMSTICKFILE_LIB: ${DRUMSTICKFILE_LIB}")
+        # file( COPY ${DRUMSTICKFILE_DLL}
+        #     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+        set ( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
+            ${DRUMSTICKFILE_LIB}
+            ${CORE_LIB}
+            ${CORE5COMPAT_LIB}
+        )
+        include(DeploymentUtils)
+    elseif (UNIX AND NOT APPLE)
+        qt_generate_deploy_app_script(
+            TARGET ${PROJECT_NAME}
+            OUTPUT_SCRIPT deploy_script
+            NO_UNSUPPORTED_PLATFORM_ERROR
+            NO_TRANSLATIONS
+            NO_COMPILER_RUNTIME
+            NO_PLUGINS
+        )
+        install(SCRIPT ${deploy_script})
         # AppImage
         install( CODE
           "include(${CMAKE_SOURCE_DIR}/cmake/CreateAppImage.cmake)
@@ -160,7 +176,7 @@ if (QT_VERSION VERSION_GREATER_EQUAL 6.0)
                 EXE \"${PROJECT_NAME}\"
                 ICON \"${PROJECT_NAME}.png\"
                 DESKTOP \"${PROJECT_NAME}.desktop\"
-                WORKDIR \"${WORKDIR}\"
+                WORKDIR \"${CMAKE_CURRENT_BINARY_DIR}\"
                 APPDIR \"${PROJECT_NAME}-v${PROJECT_VERSION}-${CMAKE_SYSTEM_PROCESSOR}.AppDir\"
                 ARCH \"${CMAKE_SYSTEM_PROCESSOR}\"
            )"
