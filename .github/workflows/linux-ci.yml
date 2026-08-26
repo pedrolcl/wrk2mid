@@ -63,6 +63,7 @@ jobs:
         -DCMAKE_PREFIX_PATH="${{env.DRUMSTICK_LOCATION}}"
         -DCMAKE_INSTALL_RPATH="\$ORIGIN/../lib"
         -DBUILD_DOCS=OFF
+        -DINSTALL_DEPENDENCIES=ON
 
     - name: '${{ matrix.icon }} Build'
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
