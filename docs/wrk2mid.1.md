@@ -25,6 +25,10 @@ It reads .WRK (Cakewalk files), and outputs .MID (Standard MIDI files).
 
 :   Prints the current version number.
 
+-d, --decoder
+
+:   Decode text events using, for instance, windows-1250 to 1258. The output text encoding will be UTF-8.
+
 -f, --format _format_
 
 :   Output SMF format (0/1).

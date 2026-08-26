@@ -20,7 +20,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(wrk2mid
   LANGUAGES CXX
-  VERSION 1.2.2
+  VERSION 1.3.0
   DESCRIPTION "Command line utility for translating WRK (Cakewalk) files into MID (standard MIDI files)"
   HOMEPAGE_URL "https://wrk2mid.sourceforge.io"
 )
@@ -40,9 +40,10 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-#set(PROJECT_RELEASE_DATE "May 10, 2026")
+set(PROJECT_RELEASE_DATE "August 27, 2026")
 option(BUILD_DOCS "Process Markdown sources of man pages and help files" ON)
 option(USE_QT5 "Prefer building with Qt5 instead of Qt6" OFF)
+option(INSTALL_DEPENDENCIES "Deploy dependency libraries" OFF)
 
 if (USE_QT5)
     find_package(QT NAMES Qt5 REQUIRED)
@@ -141,35 +142,42 @@ if ((NOT WIN32) AND Git_FOUND)
     endif()
 endif()
 
-set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "." )
-get_target_property(TARGET_CONFIG Drumstick::File IMPORTED_CONFIGURATIONS)
-get_target_property(DRUMSTICKFILE_LIB Drumstick::File IMPORTED_LOCATION_${TARGET_CONFIG})
-set ( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS ${DRUMSTICKFILE_LIB} )
-
-if (QT_VERSION VERSION_GREATER_EQUAL 6.3)
-    qt_generate_deploy_app_script(
-        TARGET ${PROJECT_NAME}
-        OUTPUT_SCRIPT deploy_script
-        NO_UNSUPPORTED_PLATFORM_ERROR
-        NO_TRANSLATIONS
-        NO_COMPILER_RUNTIME
-        NO_PLUGINS
-    )
-    install(SCRIPT ${deploy_script})
-    # AppImage
-    if (UNIX AND NOT APPLE)
-        install( CODE
-          "include(${CMAKE_SOURCE_DIR}/cmake/CreateAppImage.cmake)
-           create_appimage(
-                EXE \"${PROJECT_NAME}\"
-                ICON \"${PROJECT_NAME}.png\"
-                DESKTOP \"${PROJECT_NAME}.desktop\"
-                WORKDIR \"${CMAKE_CURRENT_BINARY_DIR}\"
-                APPDIR \"${PROJECT_NAME}-v${PROJECT_VERSION}-${CMAKE_SYSTEM_PROCESSOR}.AppDir\"
-                ARCH \"${CMAKE_SYSTEM_PROCESSOR}\"
-           )"
-        )
+if (INSTALL_DEPENDENCIES)
+    if (WIN32)
+        set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION ${CMAKE_INSTALL_BINDIR})
+        get_target_property(TARGET_CONFIG Drumstick::File IMPORTED_CONFIGURATIONS)
+        get_target_property(DRUMSTICKFILE_LIB Drumstick::File IMPORTED_LOCATION_${TARGET_CONFIG})
+        set ( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS ${DRUMSTICKFILE_LIB} )
+    else()
+        set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION ${CMAKE_INSTALL_LIBDIR})
     endif()
+
+    if (QT_VERSION VERSION_GREATER_EQUAL 6.3)
+        qt_generate_deploy_app_script(
+            TARGET ${PROJECT_NAME}
+            OUTPUT_SCRIPT deploy_script
+            NO_UNSUPPORTED_PLATFORM_ERROR
+            NO_TRANSLATIONS
+            NO_COMPILER_RUNTIME
+            NO_PLUGINS
+        )
+        install(SCRIPT ${deploy_script})
+        # AppImage
+        if (UNIX AND NOT APPLE)
+            install( CODE
+              "include(${CMAKE_SOURCE_DIR}/cmake/CreateAppImage.cmake)
+               create_appimage(
+                    EXE \"${PROJECT_NAME}\"
+                    ICON \"${PROJECT_NAME}.png\"
+                    DESKTOP \"${PROJECT_NAME}.desktop\"
+                    WORKDIR \"${CMAKE_CURRENT_BINARY_DIR}\"
+                    APPDIR \"${PROJECT_NAME}-v${PROJECT_VERSION}-${CMAKE_SYSTEM_PROCESSOR}.AppDir\"
+                    ARCH \"${CMAKE_SYSTEM_PROCESSOR}\"
+               )"
+            )
+        endif()
+    endif()
+    include(InstallRequiredSystemLibraries)
 endif()
 
 if (DEFINED ENV{GITHUB_OUTPUT})
@@ -179,7 +187,6 @@ if (DEFINED ENV{GITHUB_OUTPUT})
     )
 endif()
 
-include(InstallRequiredSystemLibraries)
 set (CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR})
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Cakewalk to Standard MIDI Files Translator")
 set (CPACK_PACKAGE_VENDOR "wrk2mid.sourceforge.io")
