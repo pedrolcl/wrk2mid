@@ -32,6 +32,12 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if (WIN32)
+    set(CMAKE_INSTALL_BINDIR ".")
+elseif (UNIX)
+    include(GNUInstallDirs)
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 #set(PROJECT_RELEASE_DATE "May 10, 2026")
@@ -41,12 +47,9 @@ option(USE_QT5 "Prefer building with Qt5 instead of Qt6" OFF)
 if (USE_QT5)
     find_package(QT NAMES Qt5 REQUIRED)
     find_package(Qt5 5.15 COMPONENTS Core REQUIRED)
-    unset(CORE5COMPAT_LIB)
 else()
     find_package(QT NAMES Qt6 REQUIRED)
     find_package(Qt6 6.2 COMPONENTS Core Core5Compat  REQUIRED)
-    get_target_property(CORE5COMPAT_LIB Qt6::Core5Compat IMPORTED_LOCATION)
-    get_target_property(CORE_LIB Qt6::Core IMPORTED_LOCATION)
 endif()
 
 find_package(Drumstick 2.11 COMPONENTS File REQUIRED)
@@ -92,15 +95,8 @@ if (QT_VERSION VERSION_GREATER_EQUAL 6.0)
     )
 endif()
 
-if (UNIX)
-    include(GNUInstallDirs)
-    install(TARGETS ${PROJECT_NAME}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-else()
-    set(CMAKE_INSTALL_BINDIR ".")
-    install(TARGETS ${PROJECT_NAME}
-            RUNTIME DESTINATION ".")
-endif()
+install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if (UNIX)
     add_subdirectory(docs)
@@ -145,31 +141,23 @@ if ((NOT WIN32) AND Git_FOUND)
     endif()
 endif()
 
-if (QT_VERSION VERSION_GREATER_EQUAL 6.0)
-    if (WIN32)
-        set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "." )
-        get_target_property(TARGET_CONFIG Drumstick::File IMPORTED_CONFIGURATIONS)
-        get_target_property(DRUMSTICKFILE_LIB Drumstick::File IMPORTED_LOCATION_${TARGET_CONFIG})
-        # message(STATUS "DRUMSTICKFILE_LIB: ${DRUMSTICKFILE_LIB}")
-        # file( COPY ${DRUMSTICKFILE_DLL}
-        #     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-        set ( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
-            ${DRUMSTICKFILE_LIB}
-            ${CORE_LIB}
-            ${CORE5COMPAT_LIB}
-        )
-        include(DeploymentUtils)
-    elseif (UNIX AND NOT APPLE)
-        qt_generate_deploy_app_script(
-            TARGET ${PROJECT_NAME}
-            OUTPUT_SCRIPT deploy_script
-            NO_UNSUPPORTED_PLATFORM_ERROR
-            NO_TRANSLATIONS
-            NO_COMPILER_RUNTIME
-            NO_PLUGINS
-        )
-        install(SCRIPT ${deploy_script})
-        # AppImage
+set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "." )
+get_target_property(TARGET_CONFIG Drumstick::File IMPORTED_CONFIGURATIONS)
+get_target_property(DRUMSTICKFILE_LIB Drumstick::File IMPORTED_LOCATION_${TARGET_CONFIG})
+set ( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS ${DRUMSTICKFILE_LIB} )
+
+if (QT_VERSION VERSION_GREATER_EQUAL 6.3)
+    qt_generate_deploy_app_script(
+        TARGET ${PROJECT_NAME}
+        OUTPUT_SCRIPT deploy_script
+        NO_UNSUPPORTED_PLATFORM_ERROR
+        NO_TRANSLATIONS
+        NO_COMPILER_RUNTIME
+        NO_PLUGINS
+    )
+    install(SCRIPT ${deploy_script})
+    # AppImage
+    if (UNIX AND NOT APPLE)
         install( CODE
           "include(${CMAKE_SOURCE_DIR}/cmake/CreateAppImage.cmake)
            create_appimage(
