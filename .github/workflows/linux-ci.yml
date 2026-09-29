@@ -47,7 +47,7 @@ jobs:
     - name: '${{ matrix.icon }} Install Qt'
       uses: jurplel/install-qt-action@v4
       with:
-        version: '6.11.1'
+        version: '6.11.2'
         modules: qt5compat
 
     - name: '${{ matrix.icon }} Install Dependencies'

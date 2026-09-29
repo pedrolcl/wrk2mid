@@ -18,6 +18,14 @@
 
 cmake_minimum_required(VERSION 3.16)
 
+if (POLICY CMP0153)
+    cmake_policy(SET CMP0153 NEW)
+endif()
+
+if (POLICY CMP0207)
+    cmake_policy(SET CMP0207 NEW)
+endif()
+
 project(wrk2mid
   LANGUAGES CXX
   VERSION 1.3.0
