@@ -17,7 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { icon: '🟦', sys: mingw64,    os: windows-latest }
+          - { icon: '🟨', sys: ucrt64,     os: windows-latest }
+          - { icon: '🟦', sys: clang64,    os: windows-latest }
           - { icon: '🟩', sys: clangarm64, os: windows-11-arm }
     runs-on: ${{ matrix.os }}
     name: 🚧${{ matrix.icon }} ${{ matrix.sys }}
