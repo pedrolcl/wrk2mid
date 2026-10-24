@@ -1,0 +1,74 @@
+name: macOS CI
+
+on:
+  push:
+    branches: [ "devel", "master" ]
+  pull_request:
+    branches: [ "devel", "master" ]
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+  DRUMSTICKNAME: DrumstickV2
+  DRUMSTICK_LOCATION: ${{github.workspace}}/DrumstickV2
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ["x86_64", "arm64"]
+        include:
+          - { arch: "x86_64", os: "macos-15-intel"  }
+          - { arch: "arm64", os: "macos-15" }
+    runs-on: ${{ matrix.os }}
+    name: 'macOS CI ${{ matrix.arch }}'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+      with:
+        submodules: true
+
+    - name: Download Drumstick
+      uses: dawidd6/action-download-artifact@v27
+      with:
+        name: ${{env.DRUMSTICKNAME}}-${{matrix.arch}}-macos.tar.gz
+        github_token: ${{secrets.GH_PAT}}
+        repo: pedrolcl/drumstick
+        workflow: mac-ci.yml
+        skip_unpack: true
+        allow_forks: false
+
+    - name: Extract downloaded artifact
+      run: tar xvzf ${{env.DRUMSTICKNAME}}-${{matrix.arch}}-macos.tar.gz
+
+    - name: 'Install Qt'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.8.3'
+        modules: qt5compat
+
+    - name: 'Configure CMake'
+      id: configuration
+      run: >
+        cmake -B ${{github.workspace}}/build
+        -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        -DCMAKE_PREFIX_PATH="${{env.DRUMSTICK_LOCATION}}"
+        -DCMAKE_OSX_DEPLOYMENT_TARGET="12.0"
+        -DCMAKE_INSTALL_RPATH="@executable_path/../Frameworks"
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Package
+      run: cmake --build ${{github.workspace}}/build --target package
+
+    - name: 'Upload Artifacts'
+      uses: actions/upload-artifact@v7
+      with:
+        name: wrk2mid-macOS-${{matrix.arch}}
+        path: ${{github.workspace}}/build/wrk2mid-v${{steps.configuration.outputs.config_version}}-macOS-${{matrix.arch}}.zip
+        retention-days: 90
+        overwrite: true
+        archive: false

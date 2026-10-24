@@ -27,10 +27,10 @@ if (POLICY CMP0207)
 endif()
 
 project(wrk2mid
-  LANGUAGES CXX
-  VERSION 1.3.0
-  DESCRIPTION "Command line utility for translating WRK (Cakewalk) files into MID (standard MIDI files)"
-  HOMEPAGE_URL "https://wrk2mid.sourceforge.io"
+    LANGUAGES CXX
+    VERSION 1.3.1
+    DESCRIPTION "Command line utility for translating WRK (Cakewalk) files into MID (standard MIDI files)"
+    HOMEPAGE_URL "https://wrk2mid.sourceforge.io"
 )
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -58,28 +58,32 @@ if (USE_QT5)
     find_package(Qt5 5.15 COMPONENTS Core REQUIRED)
 else()
     find_package(QT NAMES Qt6 REQUIRED)
-    find_package(Qt6 6.2 COMPONENTS Core Core5Compat  REQUIRED)
+    find_package(Qt6 6.5 COMPONENTS Core Core5Compat  REQUIRED)
+endif()
+
+if (NOT USE_QT5)
+    qt6_standard_project_setup(REQUIRES 6.5)
 endif()
 
 find_package(Drumstick 2.11 COMPONENTS File REQUIRED)
 
 message (STATUS "Cakewalk to Standard MIDI File Translator v${PROJECT_VERSION}
-     Install prefix: ${CMAKE_INSTALL_PREFIX}
-     Build configuration: ${CMAKE_BUILD_TYPE}
-     Operating System: ${CMAKE_SYSTEM_NAME}
-     Processor: ${CMAKE_SYSTEM_PROCESSOR}
-     Qt Version: ${QT_VERSION}
-     Drumstick Version: ${Drumstick_VERSION}
-     CMake Version: ${CMAKE_VERSION}
-     Build docs: ${BUILD_DOCS}"
+    Install prefix: ${CMAKE_INSTALL_PREFIX}
+    Build configuration: ${CMAKE_BUILD_TYPE}
+    Operating System: ${CMAKE_SYSTEM_NAME}
+    Processor: ${CMAKE_SYSTEM_PROCESSOR}
+    Qt Version: ${QT_VERSION}
+    Drumstick Version: ${Drumstick_VERSION}
+    CMake Version: ${CMAKE_VERSION}
+    Build docs: ${BUILD_DOCS}"
 )
 
 add_executable(${PROJECT_NAME}
-  events.cpp
-  events.h
-  main.cpp
-  sequence.cpp
-  sequence.h
+    events.cpp
+    events.h
+    main.cpp
+    sequence.cpp
+    sequence.h
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
@@ -107,7 +111,7 @@ endif()
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-if (UNIX)
+if (UNIX AND NOT APPLE)
     add_subdirectory(docs)
 
     install(FILES ${PROJECT_NAME}.png
@@ -150,42 +154,40 @@ if ((NOT WIN32) AND Git_FOUND)
     endif()
 endif()
 
-if (INSTALL_DEPENDENCIES)
+if ( INSTALL_DEPENDENCIES AND QT_VERSION VERSION_GREATER_EQUAL 6.10 AND NOT APPLE )
     if (WIN32)
-        set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION ${CMAKE_INSTALL_BINDIR})
         get_target_property(TARGET_CONFIG Drumstick::File IMPORTED_CONFIGURATIONS)
         get_target_property(DRUMSTICKFILE_LIB Drumstick::File IMPORTED_LOCATION_${TARGET_CONFIG})
         set ( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS ${DRUMSTICKFILE_LIB} )
+        set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION ${CMAKE_INSTALL_BINDIR})
     else()
         set ( CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION ${CMAKE_INSTALL_LIBDIR})
     endif()
-
-    if (QT_VERSION VERSION_GREATER_EQUAL 6.3)
-        qt_generate_deploy_app_script(
-            TARGET ${PROJECT_NAME}
-            OUTPUT_SCRIPT deploy_script
-            NO_UNSUPPORTED_PLATFORM_ERROR
-            NO_TRANSLATIONS
-            NO_COMPILER_RUNTIME
-            NO_PLUGINS
-        )
-        install(SCRIPT ${deploy_script})
-        # AppImage
-        if (UNIX AND NOT APPLE)
-            install( CODE
-              "include(${CMAKE_SOURCE_DIR}/cmake/CreateAppImage.cmake)
-               create_appimage(
-                    EXE \"${PROJECT_NAME}\"
-                    ICON \"${PROJECT_NAME}.png\"
-                    DESKTOP \"${PROJECT_NAME}.desktop\"
-                    WORKDIR \"${CMAKE_CURRENT_BINARY_DIR}\"
-                    APPDIR \"${PROJECT_NAME}-v${PROJECT_VERSION}-${CMAKE_SYSTEM_PROCESSOR}.AppDir\"
-                    ARCH \"${CMAKE_SYSTEM_PROCESSOR}\"
-               )"
-            )
-        endif()
-    endif()
     include(InstallRequiredSystemLibraries)
+
+    qt_generate_deploy_app_script(
+        TARGET ${PROJECT_NAME}
+        OUTPUT_SCRIPT deploy_script
+        NO_UNSUPPORTED_PLATFORM_ERROR
+        NO_TRANSLATIONS
+        NO_COMPILER_RUNTIME
+        NO_PLUGINS
+    )
+    install(SCRIPT ${deploy_script})
+    # AppImage
+    if (UNIX AND NOT APPLE)
+        install( CODE
+          "include(${CMAKE_SOURCE_DIR}/cmake/CreateAppImage.cmake)
+           create_appimage(
+                EXE \"${PROJECT_NAME}\"
+                ICON \"${PROJECT_NAME}.png\"
+                DESKTOP \"${PROJECT_NAME}.desktop\"
+                WORKDIR \"${CMAKE_CURRENT_BINARY_DIR}\"
+                APPDIR \"${PROJECT_NAME}-v${PROJECT_VERSION}-${CMAKE_SYSTEM_PROCESSOR}.AppDir\"
+                ARCH \"${CMAKE_SYSTEM_PROCESSOR}\"
+           )"
+        )
+    endif()
 endif()
 
 if (DEFINED ENV{GITHUB_OUTPUT})
@@ -216,6 +218,14 @@ if (WIN32)
     set (CPACK_NSIS_CONTACT "plcl@users.sf.net")
     set (CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
     set (CPACK_NSIS_MODIFY_PATH ON)
+endif()
+
+if(APPLE)
+    set (CPACK_SYSTEM_NAME "macOS")
+    set (CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-v${PROJECT_VERSION}-macOS-${CMAKE_SYSTEM_PROCESSOR}")
+    set (CPACK_BINARY_ZIP ON)
+    set (CPACK_BINARY_TGZ OFF)
+    set (CPACK_BINARY_STGZ OFF)
 endif()
 
 include(CPack)
