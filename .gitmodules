@@ -1,0 +1,4 @@
+[submodule "drumstick"]
+	path = drumstick
+	url = git@github.com:pedrolcl/drumstick.git
+	branch = devel

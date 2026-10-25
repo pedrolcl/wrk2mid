@@ -46,10 +46,10 @@ elseif (UNIX)
     include(GNUInstallDirs)
 endif()
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
-set(PROJECT_RELEASE_DATE "August 27, 2026")
-option(BUILD_DOCS "Process Markdown sources of man pages and help files" ON)
+#set(PROJECT_RELEASE_DATE "August 27, 2026")
+option(BUILD_DOCS "Process Markdown sources of man pages and help files" OFF)
 option(USE_QT5 "Prefer building with Qt5 instead of Qt6" OFF)
 option(INSTALL_DEPENDENCIES "Deploy dependency libraries" OFF)
 
@@ -65,7 +65,18 @@ if (NOT USE_QT5)
     qt6_standard_project_setup(REQUIRES 6.5)
 endif()
 
-find_package(Drumstick 2.11 COMPONENTS File REQUIRED)
+find_package(Drumstick 2.11 COMPONENTS File)
+if (NOT Drumstick_FOUND)
+    set(STATIC_DRUMSTICK ON)
+    set(BUILD_DOCS OFF)
+    set(BUILD_UTILS OFF)
+    set(BUILD_FRAMEWORKS OFF)
+    set(BUILD_ALSA OFF)
+    set(BUILD_FILE ON)
+    set(BUILD_RT OFF)
+    set(BUILD_WIDGETS OFF)
+    add_subdirectory(drumstick EXCLUDE_FROM_ALL)
+endif()
 
 message (STATUS "Cakewalk to Standard MIDI File Translator v${PROJECT_VERSION}
     Install prefix: ${CMAKE_INSTALL_PREFIX}
@@ -129,7 +140,7 @@ endif()
 # uninstall target
 if(NOT TARGET uninstall)
   configure_file(
-    "${CMAKE_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+    "${PROJECT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
     IMMEDIATE @ONLY)
   add_custom_target ( uninstall
@@ -146,7 +157,7 @@ if ((NOT WIN32) AND Git_FOUND)
             COMMAND ${GIT_EXECUTABLE} archive --format=zip --prefix=${ARCHNAME}/ --output ${CMAKE_BINARY_DIR}/${ARCHNAME}.zip master
             COMMAND ${GIT_EXECUTABLE} archive --format=tar --prefix=${ARCHNAME}/ master | ${GZIP} > ${CMAKE_BINARY_DIR}/${ARCHNAME}.tar.gz
             COMMAND ${GIT_EXECUTABLE} archive --format=tar --prefix=${ARCHNAME}/ master | ${BZIP2} > ${CMAKE_BINARY_DIR}/${ARCHNAME}.tar.bz2
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
             COMMENT "Creating tarballs..."
             VERBATIM )
     else()
@@ -177,7 +188,7 @@ if ( INSTALL_DEPENDENCIES AND QT_VERSION VERSION_GREATER_EQUAL 6.10 AND NOT APPL
     # AppImage
     if (UNIX AND NOT APPLE)
         install( CODE
-          "include(${CMAKE_SOURCE_DIR}/cmake/CreateAppImage.cmake)
+          "include(${PROJECT_SOURCE_DIR}/cmake/CreateAppImage.cmake)
            create_appimage(
                 EXE \"${PROJECT_NAME}\"
                 ICON \"${PROJECT_NAME}.png\"

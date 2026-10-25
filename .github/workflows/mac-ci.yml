@@ -9,8 +9,9 @@ on:
 
 env:
   BUILD_TYPE: Release
-  DRUMSTICKNAME: DrumstickV2
-  DRUMSTICK_LOCATION: ${{github.workspace}}/DrumstickV2
+  # DRUMSTICKNAME: DrumstickV2
+  # DRUMSTICK_LOCATION: ${{github.workspace}}/DrumstickV2
+  # (building static drumstick::file instead)
 
 jobs:
   build:
@@ -30,18 +31,18 @@ jobs:
       with:
         submodules: true
 
-    - name: Download Drumstick
-      uses: dawidd6/action-download-artifact@v27
-      with:
-        name: ${{env.DRUMSTICKNAME}}-${{matrix.arch}}-macos.tar.gz
-        github_token: ${{secrets.GH_PAT}}
-        repo: pedrolcl/drumstick
-        workflow: mac-ci.yml
-        skip_unpack: true
-        allow_forks: false
+    # - name: Download Drumstick
+    #   uses: dawidd6/action-download-artifact@v27
+    #   with:
+    #     name: ${{env.DRUMSTICKNAME}}-${{matrix.arch}}-macos.tar.gz
+    #     github_token: ${{secrets.GH_PAT}}
+    #     repo: pedrolcl/drumstick
+    #     workflow: mac-ci.yml
+    #     skip_unpack: true
+    #     allow_forks: false
 
-    - name: Extract downloaded artifact
-      run: tar xvzf ${{env.DRUMSTICKNAME}}-${{matrix.arch}}-macos.tar.gz
+    # - name: Extract downloaded artifact
+    #   run: tar xvzf ${{env.DRUMSTICKNAME}}-${{matrix.arch}}-macos.tar.gz
 
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v4
@@ -54,9 +55,11 @@ jobs:
       run: >
         cmake -B ${{github.workspace}}/build
         -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-        -DCMAKE_PREFIX_PATH="${{env.DRUMSTICK_LOCATION}}"
         -DCMAKE_OSX_DEPLOYMENT_TARGET="12.0"
-        -DCMAKE_INSTALL_RPATH="@executable_path/../Frameworks"
+        -DCMAKE_OSX_ARCHITECTURES=${{matrix.arch}}
+
+    # -DCMAKE_INSTALL_RPATH="@executable_path/../Frameworks"
+    # -DCMAKE_PREFIX_PATH="${{env.DRUMSTICK_LOCATION}}"
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
